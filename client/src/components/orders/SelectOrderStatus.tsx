@@ -84,10 +84,10 @@ export default function SelectOrderStatus({
 
     return (
         <div className="flex items-center justify-center">
-            {role && role === 'user' ? (
-                <span className="flex items-center justify-center gap-2">
+            {role && role.toLowerCase() === 'user' ? (
+                <span className="flex items-center justify-center gap-2 capitalize">
                     {order.status === 'pending' ? (
-                        <Loader2 size={16} className="animate-spin" />
+                        <Loader2 size={16} className="animate-spin text-amber-500" />
                     ) : (
                         (() => {
                             const item = OrderStatusData.find(
@@ -101,7 +101,7 @@ export default function SelectOrderStatus({
                             ) : null;
                         })()
                     )}
-                    {order.status}
+                    {order.status.replace(/_/g, ' ')}
                 </span>
             ) : order.status === 'pending' ? (
                 <div className="flex items-center gap-2">
@@ -153,7 +153,7 @@ export default function SelectOrderStatus({
                     {item ? (
                         <item.icon size={16} className={cn(item.text)} />
                     ) : null}
-                    {order.status}
+                    {order.status.replace(/_/g, ' ')}
                 </span>
             )}
         </div>

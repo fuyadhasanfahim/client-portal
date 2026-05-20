@@ -5,20 +5,24 @@ import envConfig from "../config/env.config.js";
 
 async function newOrderCheckout(req: Request, res: Response) {
     try {
-        const { orderID, paymentOption, paymentMethod } = req.body;
+        const { orderID, pendingOrderID, paymentOption, paymentMethod } = req.body;
 
-        if (!orderID || !paymentOption || !paymentMethod) {
+        if ((!orderID && !pendingOrderID) || !paymentOption || !paymentMethod) {
             res.status(400).json({
                 success: false,
-                message: "Missing orderID, payment option or payment method.",
+                message: "Missing orderID/pendingOrderID, payment option or payment method.",
             });
             return;
         }
 
+        const id = orderID || pendingOrderID;
+        const type = pendingOrderID ? "pending" : "order";
+
         const client_secret = await StripeServices.newOrderCheckoutInDB(
-            orderID,
+            id,
             paymentOption,
-            paymentMethod
+            paymentMethod,
+            type
         );
 
         res.status(200).json({

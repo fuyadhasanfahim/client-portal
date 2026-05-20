@@ -1,9 +1,12 @@
 import { Router } from "express";
 import axios from "axios";
+import { nanoid } from "nanoid";
 import envConfig from "../config/env.config.js";
 import { OrderModel } from "../models/order.model.js";
 import { PaymentModel } from "../models/payment.model.js";
-import { IOrder } from "../types/order.interface.js";
+import { PendingOrderModel } from "../models/pendingOrder.model.js";
+import UserModel from "../models/user.model.js";
+import { sendEmail } from "../lib/nodemailer.js";
 
 const router = Router();
 
@@ -13,14 +16,14 @@ const { paypal_client_id, paypal_client_secret, paypal_api_base_url } =
 /**
  * Calculate PayPal line items + total
  */
-function calculateOrderTotal(order: IOrder): {
+function calculateOrderTotal(order: any): {
     items: any[];
     total: number;
 } {
     const total = order.total || 0;
     const items = [
         {
-            name: order.title || `Order #${order.orderID}`,
+            name: order.title || `Order #${order.pendingOrderID || order.orderID}`,
             unit_amount: {
                 currency_code: "USD",
                 value: total.toFixed(2),
@@ -66,25 +69,20 @@ async function getAccessToken(): Promise<string> {
  */
 router.post("/create-order", async (req, res) => {
     try {
-        const { orderID } = req.body;
-        if (!orderID) {
-            res.status(400).json({ error: "Order ID is required" });
+        const { pendingOrderID } = req.body;
+        if (!pendingOrderID) {
+            res.status(400).json({ error: "Pending Order ID is required" });
             return;
         }
 
-        const order = await OrderModel.findOne({ orderID });
-        if (!order) {
-            res.status(404).json({ error: "Order not found" });
-            return;
-        }
-
-        if (order.paymentStatus === "paid") {
-            res.status(400).json({ error: "Order already paid" });
+        const pendingOrder = await PendingOrderModel.findOne({ pendingOrderID });
+        if (!pendingOrder) {
+            res.status(404).json({ error: "Pending Order not found" });
             return;
         }
 
         const accessToken = await getAccessToken();
-        const { items, total } = calculateOrderTotal(order);
+        const { items, total } = calculateOrderTotal(pendingOrder);
 
         const response = await axios.post(
             `${paypal_api_base_url}/v2/checkout/orders`,
@@ -92,8 +90,8 @@ router.post("/create-order", async (req, res) => {
                 intent: "CAPTURE",
                 purchase_units: [
                     {
-                        reference_id: order.orderID.toString(),
-                        description: `Order ${order.orderID} payment`,
+                        reference_id: pendingOrder.pendingOrderID.toString(),
+                        description: `Order ${pendingOrder.pendingOrderID} payment`,
                         amount: {
                             currency_code: "USD",
                             value: total.toFixed(2),
@@ -111,23 +109,18 @@ router.post("/create-order", async (req, res) => {
             { headers: { Authorization: `Bearer ${accessToken}` } }
         );
 
-        // ✅ Record pending payment
+        // ✅ Record pending payment in PaymentModel using pendingOrderID
         await PaymentModel.create({
             paymentID: response.data.id,
             checkoutSessionID: response.data.id,
-            userID: order.user.userID,
-            orderID,
+            userID: pendingOrder.user.userID,
+            orderID: pendingOrderID,
             paymentOption: "paypal",
             paymentMethod: "paypal",
             status: "pending",
             amount: total,
             currency: "USD",
         });
-
-        order.paymentID = response.data.id;
-        order.paymentStatus = "pending";
-        order.orderStage = "payment-completed"; // ✅ force stage to count order
-        await order.save();
 
         res.json({
             paypalOrderID: response.data.id,
@@ -149,47 +142,98 @@ router.post("/create-order", async (req, res) => {
 /**
  * Capture PayPal Order
  */
-router.post("/:orderID/capture", async (req, res) => {
+router.post("/:paymentID/capture", async (req, res) => {
     try {
-        const { orderID } = req.params;
+        const { paymentID } = req.params;
         const accessToken = await getAccessToken();
 
         const response = await axios.post(
-            `${paypal_api_base_url}/v2/checkout/orders/${orderID}/capture`,
+            `${paypal_api_base_url}/v2/checkout/orders/${paymentID}/capture`,
             {},
             { headers: { Authorization: `Bearer ${accessToken}` } }
         );
 
-        const order = await OrderModel.findOne({ paymentID: orderID });
-        if (!order) {
-            res.status(404).json({ error: "Order not found" });
+        const payment = await PaymentModel.findOne({ paymentID });
+        if (!payment) {
+            res.status(404).json({ error: "Payment record not found" });
             return;
         }
 
-        const payment = await PaymentModel.findOne({ paymentID: orderID });
-        if (!payment) {
-            res.status(404).json({ error: "Payment not found" });
+        const pendingOrderID = payment.orderID; // stored pendingOrderID in orderID field
+        const pendingOrder = await PendingOrderModel.findOne({ pendingOrderID });
+        if (!pendingOrder) {
+            res.status(404).json({ error: "Pending order not found or already completed." });
             return;
         }
+
+        let newOrderID = "";
+        let paymentStatus = "pending";
+        let orderStage = "payment-completed";
 
         if (response.data.status === "COMPLETED") {
-            order.paymentStatus = "paid";
-            await order.save();
+            newOrderID = `WBO${nanoid(10).toUpperCase()}`;
+            paymentStatus = "paid";
 
+            // 1. Create the actual Order
+            const newOrder = await OrderModel.create({
+                orderID: newOrderID,
+                user: pendingOrder.user,
+                title: pendingOrder.title,
+                pricingType: pendingOrder.pricingType,
+                price: pendingOrder.price,
+                imagesCount: pendingOrder.imagesCount,
+                details: pendingOrder.details,
+                total: pendingOrder.total,
+                orderStage: "payment-completed",
+                status: "in_progress",
+                paymentStatus: "paid",
+                paymentID: paymentID,
+            });
+
+            // 2. Update PaymentModel record to reference the actual orderID and mark paid
             await PaymentModel.updateOne(
                 { _id: payment._id },
                 {
                     status: "paid",
+                    orderID: newOrderID,
                     totalAmount: payment.amount,
-                    // you can also store payer details from response.data if needed
                 }
             );
+
+            // 3. Remove pending order after successful creation
+            await PendingOrderModel.deleteOne({ pendingOrderID });
+
+            // 4. Send Confirmation Email
+            const user = await UserModel.findOne({ userID: pendingOrder.user.userID });
+            if (user?.email) {
+                await sendEmail({
+                    from: process.env.EMAIL_USER!,
+                    to: user.email,
+                    subject: `✅ Payment Completed - Order #${newOrderID}`,
+                    html: `<div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 16px; color: #333; line-height: 1.6;">
+                <div style="max-width: 600px; margin: auto; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px;">
+                    <h2 style="color: #0f9d58; margin-bottom: 12px;">🎉 Payment Confirmed!</h2>
+                    <p>Hi ${user.name || "there"},</p>
+                    <p>Thank you for your payment! We're excited to let you know that your order has been successfully marked as <strong style="color: #0f9d58;">Paid</strong> and is now being processed via <strong>PayPal</strong>.</p>
+                    <div style="margin: 20px 0; padding: 16px; background-color: #f9f9f9; border-left: 4px solid #0f9d58;">
+                        <p><strong>User ID:</strong> ${pendingOrder.user.userID}</p>
+                        <p><strong>Order ID:</strong> ${newOrderID}</p>
+                        <p><strong>Amount Paid:</strong> ${payment.amount} USD</p>
+                    </div>
+                    <p>You can expect an update once your order is completed and ready for delivery.</p>
+                    <p>If you have any questions, feel free to reach out to us anytime.</p>
+                    <p style="margin-top: 30px;">Best regards,<br /><strong>The Project Pixel Forge Team</strong></p>
+                </div>
+            </div>`,
+                });
+            }
         }
 
         res.json({
             status: response.data.status,
-            orderStage: order.orderStage,
-            paymentStatus: order.paymentStatus,
+            orderStage,
+            paymentStatus,
+            orderID: newOrderID,
         });
     } catch (error: any) {
         console.error(

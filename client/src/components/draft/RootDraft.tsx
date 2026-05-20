@@ -34,6 +34,7 @@ import { cn } from '@/lib/utils';
 import { statusData } from '@/data/orders';
 import Link from 'next/link';
 import useLoggedInUser from '@/utils/getLoggedInUser';
+import OrderPaymentStatus from '@/components/orders/OrderPaymentStatus';
 
 function renderOrderStageAction(order: IOrder) {
     const baseClass = 'flex items-center justify-center gap-1 group';
@@ -156,7 +157,7 @@ export default function RootDraft() {
                             value={filter}
                             onValueChange={(value) => setFilter(value)}
                         >
-                            <SelectTrigger className="w-32 h-9">
+                            <SelectTrigger className="w-32 h-9 capitalize">
                                 <SelectValue placeholder={filter} />
                             </SelectTrigger>
                             <SelectContent>
@@ -172,9 +173,8 @@ export default function RootDraft() {
                                     <SelectItem
                                         key={val}
                                         value={val}
-                                        className="capitalize"
                                     >
-                                        {val}
+                                        {val === 'all' ? 'All' : val.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -212,7 +212,7 @@ export default function RootDraft() {
 
             <div className="overflow-x-auto rounded-lg border bg-background">
                 <Table>
-                    <TableHeader className="bg-accent text-primary-foreground">
+                    <TableHeader className="bg-muted/50 border-b">
                         <TableRow>
                             {[
                                 'Order ID',
@@ -225,7 +225,7 @@ export default function RootDraft() {
                             ].map((title, idx) => (
                                 <TableHead
                                     key={idx}
-                                    className="text-center font-semibold border-r last:border-r-0"
+                                    className="text-center font-semibold text-muted-foreground"
                                 >
                                     {title}
                                 </TableHead>
@@ -273,7 +273,7 @@ export default function RootDraft() {
                                             key={index}
                                             className="hover:bg-muted/50"
                                         >
-                                            <TableCell className="text-center font-medium border-r">
+                                            <TableCell className="text-center font-medium">
                                                 <Link
                                                     href={`/orders/details/${order.orderID!}`}
                                                     className={cn(
@@ -288,7 +288,7 @@ export default function RootDraft() {
                                             </TableCell>
                                             <TableCell
                                                 className={cn(
-                                                    'text-center text-sm border-r',
+                                                    'text-center text-sm',
                                                     order.status ===
                                                         'cancelled' &&
                                                         'text-destructive'
@@ -296,12 +296,12 @@ export default function RootDraft() {
                                             >
                                                 {order.user.userID}
                                             </TableCell>
-                                            <TableCell className="text-start text-sm border-r">
+                                            <TableCell className="text-start text-sm">
                                                 {order.title}
                                             </TableCell>
                                             <TableCell
                                                 className={cn(
-                                                    'text-center text-sm border-r',
+                                                    'text-center text-sm',
                                                     order.status ===
                                                         'cancelled' &&
                                                         'text-destructive'
@@ -311,22 +311,26 @@ export default function RootDraft() {
                                             </TableCell>
                                             <TableCell
                                                 className={cn(
-                                                    'text-center capitalize text-sm border-r',
+                                                    'text-center capitalize text-sm',
                                                     order.status ===
                                                         'cancelled' &&
                                                         'text-destructive'
                                                 )}
                                             >
-                                                {order.paymentStatus}
+                                                <OrderPaymentStatus
+                                                    paymentStatus={
+                                                        order.paymentStatus
+                                                    }
+                                                />
                                             </TableCell>
-                                            <TableCell className="text-center text-sm border-r">
+                                            <TableCell className="text-center text-sm">
                                                 <span
                                                     className={cn(
                                                         'flex items-center capitalize justify-center gap-1',
                                                         item && item.text
                                                     )}
                                                 >
-                                                    {order.status}
+                                                    {order.status.replace(/_/g, ' ')}
                                                 </span>
                                             </TableCell>
                                             <TableCell className="text-center">

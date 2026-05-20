@@ -86,7 +86,7 @@ export default function SelectQuoteStatus({
     return (
         <div className="flex items-center justify-center">
             {role && role === 'user' ? (
-                <span className="flex items-center justify-center gap-2">
+                <span className="flex items-center justify-center gap-2 capitalize">
                     {quote.status === 'pending' ? (
                         <Loader2 size={16} className="animate-spin" />
                     ) : (
@@ -102,7 +102,7 @@ export default function SelectQuoteStatus({
                             ) : null;
                         })()
                     )}
-                    {quote.status}
+                    {quote.status.replace(/_/g, ' ')}
                 </span>
             ) : quote.status === 'pending' ? (
                 <div className="flex items-center gap-2">
@@ -147,14 +147,14 @@ export default function SelectQuoteStatus({
             ) : (
                 <span
                     className={cn(
-                        'flex items-center justify-center gap-1',
+                        'flex items-center justify-center gap-1 capitalize',
                         item && item.text
                     )}
                 >
                     {item ? (
                         <item.icon size={16} className={cn(item.text)} />
                     ) : null}
-                    {quote.status}
+                    {quote.status.replace(/_/g, ' ')}
                 </span>
             )}
         </div>

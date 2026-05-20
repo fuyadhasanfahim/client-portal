@@ -24,6 +24,7 @@ export interface IOrderDetails {
 export interface IOrder {
     _id?: string;
     orderID: string;
+    pendingOrderID?: string;
     user: IOrderUser;
     title: string;
     pricingType: 'per-image' | 'total';

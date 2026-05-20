@@ -391,12 +391,12 @@ export default function RootDashboard() {
 
             <div className="overflow-x-auto rounded-lg border bg-background">
                 <Table>
-                    <TableHeader className="bg-accent text-primary-foreground">
+                    <TableHeader className="bg-muted/50 border-b">
                         <TableRow>
                             {tableColumns.map((title, idx) => (
                                 <TableHead
                                     key={idx}
-                                    className="text-center font-semibold border-r last:border-r-0"
+                                    className="text-center font-semibold text-muted-foreground"
                                 >
                                     {title}
                                 </TableHead>
@@ -446,7 +446,7 @@ export default function RootDashboard() {
                                             key={index}
                                             className="hover:bg-muted/50"
                                         >
-                                            <TableCell className="text-center font-medium border-r">
+                                            <TableCell className="text-center font-medium">
                                                 <Link
                                                     href={`/orders/details/${order.orderID!}`}
                                                     className={cn(
@@ -461,7 +461,7 @@ export default function RootDashboard() {
                                             </TableCell>
                                             <TableCell
                                                 className={cn(
-                                                    'text-center text-sm border-r',
+                                                    'text-center text-sm',
                                                     order.status ===
                                                         'cancelled' &&
                                                         'text-destructive'
@@ -471,7 +471,7 @@ export default function RootDashboard() {
                                             </TableCell>
                                             <TableCell
                                                 className={cn(
-                                                    'text-start text-sm border-r',
+                                                    'text-start text-sm',
                                                     order.status ===
                                                         'cancelled' &&
                                                         'text-destructive'
@@ -482,7 +482,7 @@ export default function RootDashboard() {
                                             {canViewPrices && (
                                                 <TableCell
                                                     className={cn(
-                                                        'text-center text-sm border-r',
+                                                        'text-center text-sm',
                                                         order.status ===
                                                             'cancelled' &&
                                                             'text-destructive'
@@ -493,7 +493,7 @@ export default function RootDashboard() {
                                             )}
                                             <TableCell
                                                 className={cn(
-                                                    'text-center text-sm border-r',
+                                                    'text-center text-sm',
                                                     order.status ===
                                                         'cancelled' &&
                                                         'text-destructive'
@@ -507,7 +507,7 @@ export default function RootDashboard() {
                                             </TableCell>
                                             <TableCell
                                                 className={cn(
-                                                    'text-center text-sm border-r',
+                                                    'text-center text-sm',
                                                     role === 'User' &&
                                                         order.status ===
                                                             'cancelled' &&

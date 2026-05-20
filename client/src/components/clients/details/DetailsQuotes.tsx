@@ -136,7 +136,7 @@ export default function DetailsQuotes({ userID }: { userID: string }) {
                             value={filter}
                             onValueChange={(value) => setFilter(value)}
                         >
-                            <SelectTrigger className="w-32 h-9">
+                            <SelectTrigger className="w-32 h-9 capitalize">
                                 <SelectValue placeholder={filter} />
                             </SelectTrigger>
                             <SelectContent>
@@ -152,9 +152,8 @@ export default function DetailsQuotes({ userID }: { userID: string }) {
                                     <SelectItem
                                         key={val}
                                         value={val}
-                                        className="capitalize"
                                     >
-                                        {val}
+                                        {val === 'all' ? 'All' : val.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -192,7 +191,7 @@ export default function DetailsQuotes({ userID }: { userID: string }) {
 
             <div className="overflow-x-auto rounded-lg border bg-background">
                 <Table>
-                    <TableHeader className="bg-accent text-primary-foreground">
+                    <TableHeader className="bg-muted/50 border-b">
                         <TableRow>
                             {[
                                 'Order ID',
@@ -203,7 +202,7 @@ export default function DetailsQuotes({ userID }: { userID: string }) {
                             ].map((title, idx) => (
                                 <TableHead
                                     key={idx}
-                                    className="text-center font-semibold border-r last:border-r-0"
+                                    className="text-center font-semibold text-muted-foreground"
                                 >
                                     {title}
                                 </TableHead>
@@ -214,7 +213,7 @@ export default function DetailsQuotes({ userID }: { userID: string }) {
                         {isLoading ? (
                             Array.from({ length: 5 }).map((_, i) => (
                                 <TableRow key={`loading-${i}`}>
-                                    {Array.from({ length: 7 }).map((_, j) => (
+                                    {Array.from({ length: 5 }).map((_, j) => (
                                         <TableCell
                                             key={j}
                                             className="text-center"
@@ -251,7 +250,7 @@ export default function DetailsQuotes({ userID }: { userID: string }) {
                                             key={index}
                                             className="hover:bg-muted/50"
                                         >
-                                            <TableCell className="text-center font-medium border-r">
+                                            <TableCell className="text-center font-medium">
                                                 <Link
                                                     href={`/quotes/details/${quote.quoteID!}`}
                                                     className={cn(
@@ -266,7 +265,7 @@ export default function DetailsQuotes({ userID }: { userID: string }) {
                                             </TableCell>
                                             <TableCell
                                                 className={cn(
-                                                    'text-center text-sm border-r',
+                                                    'text-center text-sm',
                                                     quote.status ===
                                                         'cancelled' &&
                                                         'text-destructive'
@@ -276,7 +275,7 @@ export default function DetailsQuotes({ userID }: { userID: string }) {
                                             </TableCell>
                                             <TableCell
                                                 className={cn(
-                                                    'text-start text-sm border-r',
+                                                    'text-start text-sm',
                                                     quote.status ===
                                                         'cancelled' &&
                                                         'text-destructive'
@@ -284,16 +283,16 @@ export default function DetailsQuotes({ userID }: { userID: string }) {
                                             >
                                                 {quote.title}
                                             </TableCell>
-                                            <TableCell className="text-center text-sm border-r">
-                                                <span
-                                                    className={cn(
-                                                        'flex items-center capitalize justify-center gap-1',
-                                                        item && item.text
-                                                    )}
-                                                >
-                                                    {quote.status}
-                                                </span>
-                                            </TableCell>
+                                             <TableCell className="text-center text-sm">
+                                                 <span
+                                                     className={cn(
+                                                         'flex items-center capitalize justify-center gap-1',
+                                                         item && item.text
+                                                     )}
+                                                 >
+                                                     {quote.status.replace(/_/g, ' ')}
+                                                 </span>
+                                             </TableCell>
                                             <TableCell className="text-center">
                                                 <Link
                                                     href={`/quotes/details/${quote.quoteID!}`}

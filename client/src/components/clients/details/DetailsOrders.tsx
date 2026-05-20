@@ -33,6 +33,7 @@ import { cn } from '@/lib/utils';
 import { statusData } from '@/data/orders';
 import Link from 'next/link';
 import { useGetOrdersByUserIDQuery } from '@/redux/features/orders/ordersApi';
+import OrderPaymentStatus from '@/components/orders/OrderPaymentStatus';
 
 const sortOptions = [
     { value: 'desc', label: 'Newest First' },
@@ -136,7 +137,7 @@ export default function DetailsOrders({ userID }: { userID: string }) {
                             value={filter}
                             onValueChange={(value) => setFilter(value)}
                         >
-                            <SelectTrigger className="w-32 h-9">
+                            <SelectTrigger className="w-32 h-9 capitalize">
                                 <SelectValue placeholder={filter} />
                             </SelectTrigger>
                             <SelectContent>
@@ -152,9 +153,8 @@ export default function DetailsOrders({ userID }: { userID: string }) {
                                     <SelectItem
                                         key={val}
                                         value={val}
-                                        className="capitalize"
                                     >
-                                        {val}
+                                        {val === 'all' ? 'All' : val.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -192,7 +192,7 @@ export default function DetailsOrders({ userID }: { userID: string }) {
 
             <div className="overflow-x-auto rounded-lg border bg-background">
                 <Table>
-                    <TableHeader className="bg-accent text-primary-foreground">
+                    <TableHeader className="bg-muted/50 border-b">
                         <TableRow>
                             {[
                                 'Order ID',
@@ -205,7 +205,7 @@ export default function DetailsOrders({ userID }: { userID: string }) {
                             ].map((title, idx) => (
                                 <TableHead
                                     key={idx}
-                                    className="text-center font-semibold border-r last:border-r-0"
+                                    className="text-center font-semibold text-muted-foreground"
                                 >
                                     {title}
                                 </TableHead>
@@ -253,7 +253,7 @@ export default function DetailsOrders({ userID }: { userID: string }) {
                                             key={index}
                                             className="hover:bg-muted/50"
                                         >
-                                            <TableCell className="text-center font-medium border-r">
+                                            <TableCell className="text-center font-medium">
                                                 <Link
                                                     href={`/orders/details/${order.orderID!}`}
                                                     className={cn(
@@ -268,7 +268,7 @@ export default function DetailsOrders({ userID }: { userID: string }) {
                                             </TableCell>
                                             <TableCell
                                                 className={cn(
-                                                    'text-center text-sm border-r',
+                                                    'text-center text-sm',
                                                     order.status ===
                                                         'cancelled' &&
                                                         'text-destructive'
@@ -278,7 +278,7 @@ export default function DetailsOrders({ userID }: { userID: string }) {
                                             </TableCell>
                                             <TableCell
                                                 className={cn(
-                                                    'text-start text-sm border-r',
+                                                    'text-start text-sm',
                                                     order.status ===
                                                         'cancelled' &&
                                                         'text-destructive'
@@ -288,7 +288,7 @@ export default function DetailsOrders({ userID }: { userID: string }) {
                                             </TableCell>
                                             <TableCell
                                                 className={cn(
-                                                    'text-center text-sm border-r',
+                                                    'text-center text-sm',
                                                     order.status ===
                                                         'cancelled' &&
                                                         'text-destructive'
@@ -298,22 +298,26 @@ export default function DetailsOrders({ userID }: { userID: string }) {
                                             </TableCell>
                                             <TableCell
                                                 className={cn(
-                                                    'text-center capitalize text-sm border-r',
+                                                    'text-center capitalize text-sm',
                                                     order.status ===
                                                         'cancelled' &&
                                                         'text-destructive'
                                                 )}
                                             >
-                                                {order.paymentStatus}
+                                                <OrderPaymentStatus
+                                                    paymentStatus={
+                                                        order.paymentStatus
+                                                    }
+                                                />
                                             </TableCell>
-                                            <TableCell className="text-center text-sm border-r">
+                                            <TableCell className="text-center text-sm">
                                                 <span
                                                     className={cn(
                                                         'flex items-center capitalize justify-center gap-1',
                                                         item && item.text
                                                     )}
                                                 >
-                                                    {order.status}
+                                                    {order.status.replace(/_/g, ' ')}
                                                 </span>
                                             </TableCell>
                                             <TableCell className="text-center">

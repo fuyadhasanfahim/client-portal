@@ -46,6 +46,38 @@ async function newOrder(req: Request, res: Response) {
             paymentStatus,
         });
 
+        // Send email notifications to client and admin on new order creation
+        if (order && order.user?.email) {
+            try {
+                const viewUrl = `${envConfig.frontend_url}/orders/details/${order.orderID}`;
+                const { subject, html } = buildSimpleOrderStatusEmail({
+                    orderID: order.orderID,
+                    status: order.status as any,
+                    userName: order.user.name,
+                    userEmail: order.user.email,
+                    viewUrl,
+                });
+
+                // Email to client
+                await sendEmail({
+                    to: order.user.email,
+                    from: envConfig.email_user!,
+                    subject,
+                    html,
+                });
+
+                // Email to admin
+                await sendEmail({
+                    to: envConfig.email_user!,
+                    from: order.user.email,
+                    subject: `New Order Created — #${order.orderID}`,
+                    html,
+                });
+            } catch (emailErr) {
+                console.error("Order creation email failed:", emailErr);
+            }
+        }
+
         res.status(201).json({
             success: true,
             orderID: order?.orderID as string,
@@ -61,6 +93,72 @@ async function newOrder(req: Request, res: Response) {
         });
     }
 }
+
+async function newPendingOrder(req: Request, res: Response) {
+    try {
+        const data = req.body;
+
+        if (!data || !data.userID) {
+            res.status(400).json({
+                success: false,
+                message: "User id and order details are required.",
+            });
+            return;
+        }
+
+        const pendingOrder = await OrderServices.newPendingOrderInDB(data);
+
+        res.status(201).json({
+            success: true,
+            pendingOrderID: pendingOrder.pendingOrderID,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "An error occurred while creating pending order",
+            error:
+                error instanceof Error
+                    ? error.message
+                    : "Something went wrong! Please try again later.",
+        });
+    }
+}
+
+async function getPendingOrder(req: Request, res: Response) {
+    try {
+        const { pendingOrderID } = req.params as any;
+
+        if (!pendingOrderID) {
+            res.status(400).json({
+                success: false,
+                message: "Pending Order ID is required.",
+            });
+            return;
+        }
+
+        const pendingOrder = await OrderServices.getPendingOrderFromDB(pendingOrderID);
+
+        if (!pendingOrder) {
+            res.status(404).json({
+                success: false,
+                message: "Pending order not found.",
+            });
+            return;
+        }
+
+        res.status(200).json({ success: true, data: pendingOrder });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "An error occurred while processing your request",
+            error:
+                error instanceof Error
+                    ? error.message
+                    : "Something went wrong! Please try again later.",
+        });
+    }
+}
+
 
 async function getOrders(req: Request, res: Response) {
     try {
@@ -447,10 +545,19 @@ async function completeOrder(req: Request, res: Response) {
             viewUrl: `${envConfig.frontend_url}/orders/details/${orderID}`,
         });
 
+        // Email to client
         await sendEmail({
             to: order.user.email,
             from: envConfig.email_user!,
             subject,
+            html,
+        });
+
+        // Email to admin
+        await sendEmail({
+            to: envConfig.email_user!,
+            from: order.user.email,
+            subject: `Order Completed — #${orderID}`,
             html,
         });
 
@@ -683,6 +790,8 @@ const OrderControllers = {
     getOrdersByStatus,
     getOrdersByUserID,
     sendRevisionMessage,
+    newPendingOrder,
+    getPendingOrder,
 };
 
 export default OrderControllers;

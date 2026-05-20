@@ -26,20 +26,20 @@ export default function OrderDetailsInvoice({
     const isUser = user.role === 'User';
 
     return (
-        <Card>
+        <Card className="border border-border shadow-sm bg-card">
             <CardHeader>
-                <CardTitle className="text-2xl">Invoice</CardTitle>
+                <CardTitle className="text-xl font-semibold">Invoice</CardTitle>
                 <CardDescription>
                     Generate and view the invoice for this order
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <Link href={`/orders/invoice/${order.orderID}`}>
-                    <Button className="w-full">
-                        <IconInvoice />
+                <Button className="w-full" asChild>
+                    <Link href={`/orders/invoice/${order.orderID}`}>
+                        <IconInvoice className="mr-2 h-4 w-4" />
                         {isUser ? 'Generate My Invoice' : 'Generate Invoice'}
-                    </Button>
-                </Link>
+                    </Link>
+                </Button>
             </CardContent>
         </Card>
     );

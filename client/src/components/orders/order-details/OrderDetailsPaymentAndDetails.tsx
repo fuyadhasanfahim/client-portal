@@ -40,6 +40,8 @@ import DeliveryLinkUploader from './DeliveryLinkUploader';
 import useLoggedInUser from '@/utils/getLoggedInUser';
 import { IOrderUser } from '@/types/order.interface';
 
+import { cn } from '@/lib/utils';
+
 const pk = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 const stripePromise = pk ? loadStripe(pk) : null;
 
@@ -164,29 +166,49 @@ export default function OrderDetailsPaymentAndDetails({
         needsPayLaterCheckout,
     ]);
 
+    const statusBadges = {
+        pending: 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-950/20 dark:text-yellow-400 dark:border-yellow-900/50',
+        in_progress: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/50',
+        delivered: 'bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-950/20 dark:text-teal-400 dark:border-teal-900/50',
+        in_review: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/50',
+        completed: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/50',
+        cancelled: 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/20 dark:text-red-400 dark:border-red-900/50',
+    };
+    const badgeClass = statusBadges[status as keyof typeof statusBadges] || 'bg-muted text-muted-foreground';
+
     return (
-        <Card className="max-h-[80vh] ">
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <IconPackage size={24} />
-                    <span className="text-2xl">Order Overview</span>
+        <Card className="border border-border shadow-sm bg-card">
+            <CardHeader className="pb-4 border-b border-border/50">
+                <CardTitle className="flex items-center gap-2 text-xl font-semibold">
+                    <IconPackage size={22} className="text-primary" />
+                    <span>Order Overview</span>
                 </CardTitle>
             </CardHeader>
 
-            <CardContent className="space-y-3 text-sm">
-                <Badge
-                    variant="outline"
-                    className="bg-blue-100 text-blue-800 capitalize"
-                >
-                    {status}
-                </Badge>
+            <CardContent className="py-5 space-y-4">
+                <div className="flex items-center justify-between text-sm py-1.5 border-b border-border/40">
+                    <span className="text-muted-foreground font-medium">Order Status</span>
+                    <Badge
+                        variant="outline"
+                        className={cn("capitalize px-2.5 py-0.5 font-medium rounded-full text-xs", badgeClass)}
+                    >
+                        {status.replace('_', ' ')}
+                    </Badge>
+                </div>
 
-                <p>
-                    <strong>Total Price:</strong> {total}
-                </p>
-                <p>
-                    <strong>Payment ID:</strong> {paymentId ?? 'N/A'}
-                </p>
+                <div className="flex items-center justify-between text-sm py-1.5 border-b border-border/40">
+                    <span className="text-muted-foreground font-medium">Total Price</span>
+                    <span className="font-semibold text-foreground text-base">
+                        {typeof total === 'number' || (typeof total === 'string' && !isNaN(Number(total))) ? `$${Number(total).toFixed(2)}` : total}
+                    </span>
+                </div>
+
+                <div className="flex items-center justify-between text-sm py-1.5">
+                    <span className="text-muted-foreground font-medium">Payment ID</span>
+                    <span className="font-mono text-xs text-foreground bg-muted px-2 py-0.5 rounded border border-border/40 max-w-[150px] truncate animate-none" title={paymentId}>
+                        {paymentId || 'N/A'}
+                    </span>
+                </div>
             </CardContent>
 
             {canDeliver && (

@@ -33,6 +33,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import getLoggedInUser from '@/utils/getLoggedInUser';
 import SelectOrderStatus from '../orders/SelectOrderStatus';
+import OrderPaymentStatus from '../orders/OrderPaymentStatus';
 import { useGetOrdersQuery } from '@/redux/features/orders/ordersApi';
 
 export default function RootInvoice() {
@@ -131,7 +132,7 @@ export default function RootInvoice() {
 
             <div className="overflow-x-auto rounded-lg border bg-background">
                 <Table>
-                    <TableHeader className="bg-accent text-primary-foreground">
+                    <TableHeader className="bg-muted/50 border-b">
                         <TableRow>
                             {[
                                 'Order ID',
@@ -144,7 +145,7 @@ export default function RootInvoice() {
                             ].map((title, idx) => (
                                 <TableHead
                                     key={idx}
-                                    className="text-center font-semibold border-r last:border-r-0"
+                                    className="text-center font-semibold text-muted-foreground"
                                 >
                                     {title}
                                 </TableHead>
@@ -192,7 +193,7 @@ export default function RootInvoice() {
                                             key={index}
                                             className="hover:bg-muted/50"
                                         >
-                                            <TableCell className="text-center font-medium border-r">
+                                            <TableCell className="text-center font-medium">
                                                 <Link
                                                     href={`/orders/details/${order.orderID!}`}
                                                     className={cn(
@@ -207,7 +208,7 @@ export default function RootInvoice() {
                                             </TableCell>
                                             <TableCell
                                                 className={cn(
-                                                    'text-center text-sm border-r',
+                                                    'text-center text-sm',
                                                     order.status ===
                                                         'cancelled' &&
                                                         'text-destructive'
@@ -215,12 +216,12 @@ export default function RootInvoice() {
                                             >
                                                 {order.user.userID}
                                             </TableCell>
-                                            <TableCell className="text-start text-sm border-r">
+                                            <TableCell className="text-start text-sm">
                                                 {order.title}
                                             </TableCell>
                                             <TableCell
                                                 className={cn(
-                                                    'text-center text-sm border-r',
+                                                    'text-center text-sm',
                                                     order.status ===
                                                         'cancelled' &&
                                                         'text-destructive'
@@ -230,15 +231,19 @@ export default function RootInvoice() {
                                             </TableCell>
                                             <TableCell
                                                 className={cn(
-                                                    'text-center capitalize text-sm border-r',
+                                                    'text-center capitalize text-sm',
                                                     order.status ===
                                                         'cancelled' &&
                                                         'text-destructive'
                                                 )}
                                             >
-                                                {order.paymentStatus}
+                                                <OrderPaymentStatus
+                                                    paymentStatus={
+                                                        order.paymentStatus
+                                                    }
+                                                />
                                             </TableCell>
-                                            <TableCell className="text-center text-sm border-r">
+                                            <TableCell className="text-center text-sm">
                                                 <span
                                                     className={cn(
                                                         'flex items-center capitalize justify-center gap-1',

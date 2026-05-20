@@ -18,7 +18,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import ApiError from '@/components/shared/ApiError';
 import { useNewOrderCheckoutMutation } from '@/redux/features/stripe/stripeApi';
 import { Loader2, CreditCard, Clock } from 'lucide-react';
-import { useGetOrderByIDQuery } from '@/redux/features/orders/ordersApi';
+import { useGetPendingOrderByIDQuery } from '@/redux/features/orders/ordersApi';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import PayPalCheckoutButton from './PayPalCheckoutButton';
@@ -60,7 +60,7 @@ export default function RootNewOrderPayment({ orderID }: { orderID: string }) {
     const router = useRouter();
 
     const { data: orderData, isLoading: isOrderLoading } =
-        useGetOrderByIDQuery(orderID);
+        useGetPendingOrderByIDQuery(orderID);
     const [newOrderCheckout] = useNewOrderCheckoutMutation();
     const [newPayment] = useNewPaymentMutation();
 
@@ -70,14 +70,6 @@ export default function RootNewOrderPayment({ orderID }: { orderID: string }) {
     const [isProcessingPayLater, setIsProcessingPayLater] = useState(false);
 
     useEffect(() => {
-        if (!isOrderLoading && orderData?.data.paymentStatus === 'paid') {
-            toast.error('This order has already been paid. Redirecting...');
-            const timer = setTimeout(() => router.push('/orders'), 3000);
-            return () => clearTimeout(timer);
-        }
-    }, [isOrderLoading, orderData?.data.paymentStatus, router]);
-
-    useEffect(() => {
         const fetchStripeClientSecret = async () => {
             if (paymentOption !== 'stripe') return;
 
@@ -85,7 +77,7 @@ export default function RootNewOrderPayment({ orderID }: { orderID: string }) {
             try {
                 const res = await newOrderCheckout({
                     userID,
-                    orderID,
+                    pendingOrderID: orderID,
                     paymentOption: 'pay-now',
                     paymentMethod: 'card-payment',
                 }).unwrap();
@@ -109,11 +101,11 @@ export default function RootNewOrderPayment({ orderID }: { orderID: string }) {
         try {
             const res = await newPayment({
                 userID,
-                orderID,
+                orderID, // this is the pendingOrderID
                 paymentOption: 'pay-later',
-                paymentMethod: 'pending',
+                paymentMethodID: 'pending',
                 status: 'pending',
-                amount: !isOrderLoading && orderData?.data.total,
+                amount: !isOrderLoading && orderData?.data?.total,
             }).unwrap();
 
             if (res?.success) {

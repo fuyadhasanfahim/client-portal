@@ -8,6 +8,7 @@ import {
 } from "../types/order.interface.js";
 import { IPayment } from "../types/payment.interface.js";
 import RevisionModel from "../models/revision.model.js";
+import { PendingOrderModel } from "../models/pendingOrder.model.js";
 
 async function newOrderInDB({
     orderStage,
@@ -479,6 +480,52 @@ async function getOrdersByUserIDFromDB({
     };
 }
 
+async function newPendingOrderInDB(data: any) {
+    try {
+        const user = await UserModel.findOne({ userID: data.userID });
+        if (!user) throw new Error("User not found!");
+
+        const pendingOrder = await PendingOrderModel.create({
+            pendingOrderID: `PO${nanoid(10).toUpperCase()}`,
+            user: {
+                userID: data.userID,
+                name: user.name,
+                email: user.email,
+                image: user.image ?? "",
+                company: user.company,
+                address: user.address,
+            },
+            title: data.title || "New Order",
+            pricingType: data.pricingType || "per-image",
+            price: data.price || 0,
+            imagesCount: data.imagesCount || 0,
+            details: data.details || {},
+            total: data.total || 0,
+        });
+
+        return pendingOrder;
+    } catch (error) {
+        throw new Error(
+            error instanceof Error
+                ? error.message
+                : "Failed to create pending order."
+        );
+    }
+}
+
+async function getPendingOrderFromDB(pendingOrderID: string) {
+    try {
+        const pendingOrder = await PendingOrderModel.findOne({ pendingOrderID });
+        return pendingOrder;
+    } catch (error) {
+        throw new Error(
+            error instanceof Error
+                ? error.message
+                : "Failed to fetch pending order."
+        );
+    }
+}
+
 const OrderServices = {
     newOrderInDB,
     getOrdersFromDB,
@@ -491,6 +538,8 @@ const OrderServices = {
     completeOrderInDB,
     getOrdersByStatusFromDB,
     getOrdersByUserIDFromDB,
+    newPendingOrderInDB,
+    getPendingOrderFromDB,
 };
 
 export default OrderServices;

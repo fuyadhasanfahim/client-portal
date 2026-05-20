@@ -115,29 +115,29 @@ export default function ClientDataTable() {
 
             <div className="overflow-x-auto rounded-lg border bg-background">
                 <Table>
-                    <TableHeader className="bg-accent text-primary-foreground">
+                    <TableHeader className="bg-muted/50 border-b">
                         <TableRow>
-                            <TableHead className="font-semibold border-r text-center">
+                            <TableHead className="font-semibold text-muted-foreground text-center">
                                 User ID
                             </TableHead>
-                            <TableHead className="font-semibold border-r text-center">
+                            <TableHead className="font-semibold text-muted-foreground text-center">
                                 Name
                             </TableHead>
-                            <TableHead className="font-semibold border-r text-center">
+                            <TableHead className="font-semibold text-muted-foreground text-center">
                                 Email
                             </TableHead>
-                            <TableHead className="font-semibold border-r text-center">
+                            <TableHead className="font-semibold text-muted-foreground text-center">
                                 Role
                             </TableHead>
                             <TableHead
-                                className="font-semibold cursor-pointer border-r text-center"
+                                className="font-semibold text-muted-foreground cursor-pointer text-center"
                                 onClick={() => handleSort('createdAt')}
                             >
                                 Created At{' '}
                                 {sortBy === 'createdAt' &&
                                     (sortOrder === 'asc' ? '↑' : '↓')}
                             </TableHead>
-                            <TableHead className="font-semibold text-center">
+                            <TableHead className="font-semibold text-muted-foreground text-center">
                                 Actions
                             </TableHead>
                         </TableRow>
@@ -184,22 +184,22 @@ export default function ClientDataTable() {
                                         key={client.userID}
                                         className="hover:bg-muted/50"
                                     >
-                                        <TableCell className="font-medium border-r">
+                                        <TableCell className="font-medium text-center">
                                             #{client.userID}
                                         </TableCell>
-                                        <TableCell className="font-medium border-r">
+                                        <TableCell className="font-medium text-center">
                                             {client.name}
                                         </TableCell>
-                                        <TableCell className="border-r">
+                                        <TableCell className="text-center">
                                             {client.email}
                                         </TableCell>
-                                        <TableCell className="border-r capitalize">
+                                        <TableCell className="capitalize text-center">
                                             {client.role}
                                         </TableCell>
-                                        <TableCell className="border-r text-center">
+                                        <TableCell className="text-center">
                                             {format(client.createdAt, 'PPP')}
                                         </TableCell>
-                                        <TableCell className='text-center'>
+                                        <TableCell className="text-center">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
                                                     <Button

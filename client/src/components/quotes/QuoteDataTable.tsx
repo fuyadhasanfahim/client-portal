@@ -171,7 +171,7 @@ export default function QuoteDataTable({
                             value={filter}
                             onValueChange={(value) => setFilter(value)}
                         >
-                            <SelectTrigger className="w-32 h-9">
+                            <SelectTrigger className="w-32 h-9 capitalize">
                                 <SelectValue placeholder={filter} />
                             </SelectTrigger>
                             <SelectContent>
@@ -187,9 +187,8 @@ export default function QuoteDataTable({
                                     <SelectItem
                                         key={val}
                                         value={val}
-                                        className="capitalize"
                                     >
-                                        {val}
+                                        {val === 'all' ? 'All' : val.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
                                     </SelectItem>
                                 ))}
                             </SelectContent>

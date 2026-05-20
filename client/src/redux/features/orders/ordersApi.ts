@@ -169,6 +169,21 @@ export const ordersApi = apiSlice.injectEndpoints({
                 }),
                 providesTags: ['Orders'],
             }),
+            newPendingOrder: builder.mutation({
+                query: (data) => ({
+                    url: 'orders/pending-order',
+                    method: 'POST',
+                    body: data,
+                }),
+                invalidatesTags: ['Orders'],
+            }),
+            getPendingOrderByID: builder.query({
+                query: (pendingOrderID) => ({
+                    url: `orders/pending-order/${pendingOrderID}`,
+                    method: 'GET',
+                }),
+                providesTags: ['Orders'],
+            }),
         };
     },
 });
@@ -187,4 +202,6 @@ export const {
     useGetOrdersByUserIDQuery,
     useSendRevisionMessageMutation,
     useGetAllOrdersByUserIDQuery,
+    useNewPendingOrderMutation,
+    useGetPendingOrderByIDQuery,
 } = ordersApi;

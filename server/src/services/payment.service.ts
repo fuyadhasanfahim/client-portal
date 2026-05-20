@@ -11,11 +11,12 @@ import {
 import { PaymentModel } from "../models/payment.model.js";
 import { IPayment } from "../types/payment.interface.js";
 import { OrderModel } from "../models/order.model.js";
+import { PendingOrderModel } from "../models/pendingOrder.model.js";
 import { nanoid } from "nanoid";
 
 async function newPaymentInDB({
     userID,
-    orderID,
+    orderID, // could be orderID or pendingOrderID
     paymentOption,
     paymentMethodID,
     paymentIntentID,
@@ -24,14 +25,45 @@ async function newPaymentInDB({
     amount,
     currency,
 }: Partial<IPayment>) {
-    const order = await OrderModel.findOne({ orderID });
-    if (!order) throw new Error("Order not found with this order id.");
+    if (!orderID) throw new Error("Order ID or Pending Order ID is required.");
+
+    let targetOrderID = orderID;
+    
+    // Check if it's a pending order ID (starts with "PO")
+    if (orderID.startsWith("PO")) {
+        const pendingOrder = await PendingOrderModel.findOne({ pendingOrderID: orderID });
+        if (!pendingOrder) {
+            throw new Error("Pending Order not found with this id.");
+        }
+
+        // Convert PendingOrder to real Order
+        targetOrderID = `WBO${nanoid(10).toUpperCase()}`;
+        await OrderModel.create({
+            orderID: targetOrderID,
+            user: pendingOrder.user,
+            title: pendingOrder.title,
+            pricingType: pendingOrder.pricingType,
+            price: pendingOrder.price,
+            imagesCount: pendingOrder.imagesCount,
+            details: pendingOrder.details,
+            total: pendingOrder.total,
+            orderStage: "payment-completed",
+            status: "pending",
+            paymentStatus: "pay-later",
+        });
+
+        // Delete PendingOrder
+        await PendingOrderModel.deleteOne({ pendingOrderID: orderID });
+    }
+
+    const order = await OrderModel.findOne({ orderID: targetOrderID });
+    if (!order) throw new Error("Order not found.");
 
     // generate paymentID if not passed
     const paymentID = paymentMethodID || `WBP${nanoid(10)}`;
 
     // ✅ check if payment already exists for (orderID + status)
-    let payment = await PaymentModel.findOne({ orderID, status });
+    let payment = await PaymentModel.findOne({ orderID: targetOrderID, status });
 
     if (payment) {
         // update existing payment
@@ -55,7 +87,7 @@ async function newPaymentInDB({
         payment = await PaymentModel.create({
             paymentID,
             userID,
-            orderID,
+            orderID: targetOrderID,
             paymentOption,
             paymentMethodID,
             paymentIntentID,

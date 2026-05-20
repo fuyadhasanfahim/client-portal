@@ -12,6 +12,9 @@ router.get("/get-orders-by-status/:status", OrderControllers.getOrdersByStatus);
 router.get("/get-orders-by-user", OrderControllers.getOrdersByUserID);
 router.get("/get-revisions/:orderID", OrderControllers.getRevision);
 
+router.post("/pending-order", OrderControllers.newPendingOrder);
+router.get("/pending-order/:pendingOrderID", OrderControllers.getPendingOrder);
+
 router.post("/new-order/:orderStage", OrderControllers.newOrder);
 
 router.put("/update-order/:orderID", OrderControllers.updateOrder);

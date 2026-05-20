@@ -24,7 +24,7 @@ export default function PayPalCheckoutButton({ order }: { order: IOrder }) {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        orderID: order.orderID,
+                        pendingOrderID: order.pendingOrderID || order.orderID,
                     }),
                 }
             );

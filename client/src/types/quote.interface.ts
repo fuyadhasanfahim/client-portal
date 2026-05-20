@@ -1,5 +1,3 @@
-import { Document } from 'mongoose';
-
 export interface IQuoteUser {
     userID: string;
     name: string;
@@ -44,20 +42,21 @@ export interface IQuoteDetails {
     instructions?: string;
 }
 
-export interface IQuote extends Document {
+export interface IQuote {
+    _id?: string;
     quoteID: string;
     user: IQuoteUser;
-    services: IQuoteServiceSelection[];
+    title: string;
     details?: IQuoteDetails;
     isRevision?: boolean;
     status:
         | 'pending'
-        | 'in-progress'
-        | 'delivered'
-        | 'in-revision'
+        | 'in_progress'
+        | 'in_review'
         | 'completed'
-        | 'canceled';
-    quoteStage: 'draft' | 'services-selected' | 'details-provided';
+        | 'delivered'
+        | 'cancelled';
+    quoteStage: 'draft' | 'details-provided';
     createdAt: Date;
     updatedAt: Date;
 }

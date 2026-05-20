@@ -220,27 +220,36 @@ export const renderEmailTemplateNode = (props: EmailTemplateProps): string => {
 export type SimpleOrderStatus =
     | "pending"
     | "in-progress"
+    | "in_progress"
     | "delivered"
     | "in-revision"
+    | "in_review"
     | "completed"
-    | "canceled";
+    | "canceled"
+    | "cancelled";
 
 const SUBJECT: Record<SimpleOrderStatus, (id: string) => string> = {
     pending: (id) => `Order #${id} — Pending`,
     "in-progress": (id) => `Order #${id} — In progress`,
+    in_progress: (id) => `Order #${id} — In progress`,
     delivered: (id) => `Order #${id} — Delivered`,
     "in-revision": (id) => `Order #${id} — In revision`,
+    in_review: (id) => `Order #${id} — In review`,
     completed: (id) => `Order #${id} — Completed`,
     canceled: (id) => `Order #${id} — Canceled`,
+    cancelled: (id) => `Order #${id} — Cancelled`,
 };
 
 const BADGE_TYPE: Record<SimpleOrderStatus, "success" | "warning" | "info"> = {
     pending: "info",
     "in-progress": "info",
+    in_progress: "info",
     delivered: "info",
     "in-revision": "warning",
+    in_review: "warning",
     completed: "success",
     canceled: "warning",
+    cancelled: "warning",
 };
 
 export function buildSimpleOrderStatusEmail(opts: {
@@ -303,10 +312,13 @@ const label = (s: SimpleOrderStatus) =>
     ({
         pending: "Pending",
         "in-progress": "In progress",
+        in_progress: "In progress",
         delivered: "Delivered",
         "in-revision": "In revision",
+        in_review: "In review",
         completed: "Completed",
         canceled: "Canceled",
+        cancelled: "Cancelled",
     })[s];
 
 export type ApplicantStatus =

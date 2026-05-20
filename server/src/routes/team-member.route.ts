@@ -25,7 +25,7 @@ const InviteBodySchema = z.object({
     inviteUrl: z.string().url(),
     ownerUserID: z.string().min(1),
     permissions: PermissionsSchema.default({}),
-    services: z.union([z.literal("all"), z.array(ServiceSchema)]),
+    services: z.union([z.literal("all"), z.array(ServiceSchema)]).optional(),
 });
 
 function summarizePermissions(p: z.infer<typeof PermissionsSchema>): string[] {
@@ -38,8 +38,9 @@ function summarizePermissions(p: z.infer<typeof PermissionsSchema>): string[] {
 }
 
 function servicesSummary(
-    services: "all" | { name: string; price?: number }[]
+    services?: "all" | { name: string; price?: number }[]
 ): string {
+    if (!services) return "All services";
     if (services === "all") return "All services";
     if (!services.length) return "None specified";
     return services

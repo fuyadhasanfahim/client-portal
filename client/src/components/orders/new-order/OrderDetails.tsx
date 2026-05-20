@@ -34,7 +34,7 @@ import { useRouter } from 'next/navigation';
 import { Label } from '@/components/ui/label';
 import { MultiSelect } from '@/components/shared/multi-select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { IOrderDetails, IOrderServiceSelection } from '@/types/order.interface';
+import { IOrderDetails } from '@/types/order.interface';
 import { DateAndTimePicker } from '@/components/shared/DateAndTimePicker';
 import useLoggedInUser from '@/utils/getLoggedInUser';
 import FileUploadField from '@/components/shared/FileUploadField';
@@ -47,27 +47,16 @@ export default function OrderDetails({ orderID }: { orderID: string }) {
         skip: !orderID,
     });
 
-    const { services } = !isOrderLoading && data ? data.data : [];
+    const order = !isOrderLoading && data ? data.data : null;
+    const price = order?.price ?? 0;
+    const pricingType = order?.pricingType ?? 'per-image';
 
-    const totalNetPrice = services?.reduce(
-        (sum: number, service: IOrderServiceSelection) => {
-            let base = service.price ?? 0;
-
-            if (service.types) {
-                base += service.types?.reduce(
-                    (s, t) => s + (t.price ?? 0) + (t.complexity?.price ?? 0),
-                    0
-                );
-            }
-
-            if (service.complexity) {
-                base += service.complexity.price;
-            }
-
-            return sum + base;
-        },
-        0
-    );
+    const calculateTotal = (imagesCount: number) => {
+        if (pricingType === 'per-image') {
+            return price * imagesCount;
+        }
+        return price;
+    };
 
     const form = useForm<z.infer<typeof NewOrderDetailsSchema>>({
         resolver: zodResolver(NewOrderDetailsSchema) as any,
@@ -101,7 +90,7 @@ export default function OrderDetails({ orderID }: { orderID: string }) {
                     orderStage: 'payment-completed',
                     orderID,
                     details: data as IOrderDetails,
-                    total: totalNetPrice * Number(data.images),
+                    total: calculateTotal(Number(data.images)),
                     paymentStatus: 'pay-later',
                 }).unwrap();
 

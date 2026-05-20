@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { IOrder, IOrderServiceSelection } from '@/types/order.interface';
+import { IOrder } from '@/types/order.interface';
 import {
     Table,
     TableBody,
@@ -125,35 +125,30 @@ export default function InvoiceTemplate({
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {order.services?.map(
-                            (
-                                service: IOrderServiceSelection,
-                                index: number
-                            ) => (
-                                <TableRow
-                                    key={index}
-                                    className="border-b border-gray-100"
-                                >
-                                    <TableCell className="py-4 text-gray-500">
-                                        {index + 1}
-                                    </TableCell>
-                                    <TableCell className="py-4">
-                                        <div className="font-medium text-gray-800">
-                                            {service.name}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="text-center py-4 text-gray-600">
-                                        {order.details?.images}
-                                    </TableCell>
-                                    <TableCell className="text-right py-4 text-gray-600">
-                                        ${service.price?.toFixed(2)}
-                                    </TableCell>
-                                    <TableCell className="text-right py-4 font-medium text-gray-800">
-                                        ${service.price?.toFixed(2)}
-                                    </TableCell>
-                                </TableRow>
-                            )
-                        )}
+                        <TableRow className="border-b border-gray-100">
+                            <TableCell className="py-4 text-gray-500">
+                                1
+                            </TableCell>
+                            <TableCell className="py-4">
+                                <div className="font-medium text-gray-800">
+                                    {order.title}
+                                </div>
+                                {order.pricingType && (
+                                    <div className="text-xs text-gray-400 capitalize">
+                                        Pricing: {order.pricingType === 'per-image' ? 'Per Image' : 'Total Price'}
+                                    </div>
+                                )}
+                            </TableCell>
+                            <TableCell className="text-center py-4 text-gray-600">
+                                {order.imagesCount || 1}
+                            </TableCell>
+                            <TableCell className="text-right py-4 text-gray-600">
+                                ${order.price?.toFixed(2)}
+                            </TableCell>
+                            <TableCell className="text-right py-4 font-medium text-gray-800">
+                                ${order.total?.toFixed(2)}
+                            </TableCell>
+                        </TableRow>
                     </TableBody>
                     <TableFooter>
                         <TableRow className="border-t-2 border-gray-200">
@@ -245,7 +240,7 @@ export default function InvoiceTemplate({
                                     className={`px-2 py-1 rounded text-xs font-medium ${
                                         order.status === 'completed'
                                             ? 'bg-green-50 text-green-700 border border-green-200'
-                                            : order.status === 'in-progress'
+                                            : order.status === 'in_progress'
                                             ? 'bg-blue-50 text-blue-700 border border-blue-200'
                                             : 'bg-gray-50 text-gray-700 border border-gray-200'
                                     }`}

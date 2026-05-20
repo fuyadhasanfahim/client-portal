@@ -15,7 +15,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import {
     IOrder,
-    IOrderServiceSelection,
     IOrderUser,
 } from '@/types/order.interface';
 import { IPayment } from '@/types/payment.interface';
@@ -44,6 +43,7 @@ const statusBadge = (status: string) => {
             return 'bg-green-100 text-green-700 border-green-200';
         case 'pending':
             return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+        case 'failed':
         case 'payment-failed':
             return 'bg-red-100 text-red-700 border-red-200';
         case 'pay-later':
@@ -69,22 +69,18 @@ export default function MultiOrderInvoiceTemplate({
     let serial = 1;
 
     for (const order of orders) {
-        const services = order.services ?? [];
-        for (const svc of services as IOrderServiceSelection[]) {
-            const qty = (svc as any)?.quantity ?? 1;
-            const unitPrice = Number(svc.price ?? 0);
-            rows.push({
-                serial: serial++,
-                orderID: order.orderID,
-                orderCreatedAt: order.createdAt,
-                paymentStatus: order.paymentStatus,
-                serviceName: svc.name,
-                serviceComplexity: svc.complexity?.name,
-                qty,
-                unitPrice,
-                amount: unitPrice * qty,
-            });
-        }
+        const qty = order.pricingType === 'per-image' ? order.imagesCount : 1;
+        const unitPrice = order.price ?? 0;
+        rows.push({
+            serial: serial++,
+            orderID: order.orderID,
+            orderCreatedAt: order.createdAt,
+            paymentStatus: order.paymentStatus,
+            serviceName: order.title,
+            qty,
+            unitPrice,
+            amount: order.total,
+        });
     }
 
     const subtotal = rows.reduce((sum, r) => sum + r.amount, 0);

@@ -3,11 +3,9 @@ import {
     FileText,
     LayoutDashboard,
     LucideIcon,
-    Mail,
     Package,
     Package2,
     PackageOpen,
-    ServerIcon,
     Users,
     UsersRound,
 } from 'lucide-react';
@@ -59,18 +57,6 @@ export const sidebarItems: SidebarItem[] = [
         access: ['admin'],
     },
     {
-        title: 'Services',
-        url: '/services',
-        icon: ServerIcon,
-        access: ['admin'],
-    },
-    {
-        title: 'Messages',
-        url: '/messages',
-        icon: Mail,
-        access: ['admin'],
-    },
-    {
         title: 'Team Members',
         url: '/team-members',
         icon: Users,
@@ -90,3 +76,4 @@ export const sidebarItems: SidebarItem[] = [
         access: ['admin', 'user'],
     },
 ];
+

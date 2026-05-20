@@ -95,7 +95,7 @@ export default function DetailsOverview({ userID }: { userID: string }) {
 
                 if (order.status === 'completed') {
                     monthlyData[monthKey].completedOrders += 1;
-                } else if (order.status === 'canceled') {
+                } else if (order.status === 'cancelled') {
                     monthlyData[monthKey].canceledOrders += 1;
                 }
                 monthlyData[monthKey].newOrders += 1;
@@ -146,7 +146,7 @@ export default function DetailsOverview({ userID }: { userID: string }) {
 
                 if (order.status === 'completed') {
                     dailyData[dateKey].completedOrders += 1;
-                } else if (order.status === 'canceled') {
+                } else if (order.status === 'cancelled') {
                     dailyData[dateKey].canceledOrders += 1;
                 }
                 dailyData[dateKey].newOrders += 1;

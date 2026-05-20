@@ -1,14 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Router } from "express";
 import axios from "axios";
 import envConfig from "../config/env.config.js";
 import { OrderModel } from "../models/order.model.js";
 import { PaymentModel } from "../models/payment.model.js";
-import {
-    IOrder,
-    IOrderServiceSelection,
-    IOrderServiceType,
-} from "../types/order.interface.js";
+import { IOrder } from "../types/order.interface.js";
 
 const router = Router();
 
@@ -22,82 +17,17 @@ function calculateOrderTotal(order: IOrder): {
     items: any[];
     total: number;
 } {
-    const items: any[] = [];
-    const imageCount = order.details?.images || 0;
-    let total = 0;
-
-    order.services.forEach((service: IOrderServiceSelection) => {
-        if (service.price) {
-            const amount = service.price * imageCount;
-            total += amount;
-            items.push({
-                name: `${service.name} (flat price)`,
-                unit_amount: {
-                    currency_code: "USD",
-                    value: service.price.toFixed(2),
-                },
-                quantity: imageCount.toString(),
-            });
-        }
-
-        if (service.complexity) {
-            const amount = service.complexity.price * imageCount;
-            total += amount;
-            items.push({
-                name: `${service.name} → ${service.complexity.name}`,
-                unit_amount: {
-                    currency_code: "USD",
-                    value: service.complexity.price.toFixed(2),
-                },
-                quantity: imageCount.toString(),
-            });
-        }
-
-        if (service.types?.length) {
-            service.types.forEach((type: IOrderServiceType) => {
-                if (type.complexity) {
-                    const amount = type.complexity.price * imageCount;
-                    total += amount;
-                    items.push({
-                        name: `${service.name} → ${type.name} → ${type.complexity.name}`,
-                        unit_amount: {
-                            currency_code: "USD",
-                            value: type.complexity.price.toFixed(2),
-                        },
-                        quantity: imageCount.toString(),
-                    });
-                }
-            });
-        }
-
-        if (service.options?.length) {
-            const optionFee = 0.25;
-            const amount = service.options.length * optionFee * imageCount;
-            total += amount;
-            items.push({
-                name: `${service.name} → ${service.options.length} option(s)`,
-                unit_amount: {
-                    currency_code: "USD",
-                    value: optionFee.toFixed(2),
-                },
-                quantity: (service.options.length * imageCount).toString(),
-            });
-        }
-    });
-
-    if (order.details?.imageResizing) {
-        const resizingFee = 0.25;
-        const amount = resizingFee * imageCount;
-        total += amount;
-        items.push({
-            name: `Image resizing`,
+    const total = order.total || 0;
+    const items = [
+        {
+            name: order.title || `Order #${order.orderID}`,
             unit_amount: {
                 currency_code: "USD",
-                value: resizingFee.toFixed(2),
+                value: total.toFixed(2),
             },
-            quantity: imageCount.toString(),
-        });
-    }
+            quantity: "1",
+        },
+    ];
 
     return { items, total };
 }

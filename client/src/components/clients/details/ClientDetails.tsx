@@ -19,11 +19,6 @@ import {
 import { useGetUserInfoQuery } from '@/redux/features/users/userApi';
 import TeamMemberDataTable from './TeamMemberDataTable';
 
-interface Service {
-    name: string;
-    price: number;
-}
-
 interface UserData {
     _id: string;
     name: string;
@@ -31,7 +26,6 @@ interface UserData {
     phone?: string;
     address?: string;
     image?: string;
-    services?: Service[];
     isExistingUser?: boolean;
     currency?: string;
     role?: string;
@@ -106,8 +100,7 @@ export default function ClientDetails({ userID }: { userID: string }) {
         return `${currencySymbols[currency] || currency} ${amount.toFixed(2)}`;
     };
 
-    const totalServiceValue =
-        user.services?.reduce((sum, service) => sum + service.price, 0) || 0;
+
 
     return (
         <div className="space-y-6">
@@ -189,72 +182,10 @@ export default function ClientDetails({ userID }: { userID: string }) {
                                     )}
                                 </div>
                             </div>
-
-                            {/* Services Summary */}
-                            {user.services && user.services.length > 0 && (
-                                <div>
-                                    <h4 className="font-medium text-sm text-muted-foreground mb-3">
-                                        Services Overview
-                                    </h4>
-                                    <div className="flex items-center gap-4 text-sm">
-                                        <div className="flex items-center gap-2">
-                                            <DollarSign className="w-4 h-4 text-muted-foreground" />
-                                            <span>
-                                                Total Value:{' '}
-                                                {formatCurrency(
-                                                    totalServiceValue,
-                                                    user.currency
-                                                )}
-                                            </span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <Users className="w-4 h-4 text-muted-foreground" />
-                                            <span>
-                                                {user.services.length} Service
-                                                {user.services.length > 1
-                                                    ? 's'
-                                                    : ''}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     </div>
                 </CardContent>
             </Card>
-
-            {/* Services Detail */}
-            {user.services && user.services.length > 0 && (
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <DollarSign className="w-5 h-5" />
-                            Services & Pricing
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {user.services.map((service, index) => (
-                                <div
-                                    key={index}
-                                    className="p-4 border rounded-lg"
-                                >
-                                    <h5 className="font-medium text-sm mb-2">
-                                        {service.name}
-                                    </h5>
-                                    <p className="text-lg font-semibold text-primary">
-                                        {formatCurrency(
-                                            service.price,
-                                            user.currency
-                                        )}
-                                    </p>
-                                </div>
-                            ))}
-                        </div>
-                    </CardContent>
-                </Card>
-            )}
 
             {/* Team Members */}
             <div className='space-y-2'>

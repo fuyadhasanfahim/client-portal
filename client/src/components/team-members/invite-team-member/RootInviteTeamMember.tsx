@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import useLoggedInUser from '@/utils/getLoggedInUser';
 
 import {
@@ -16,37 +16,14 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Copy, ExternalLink, Loader2, RefreshCw, Send } from 'lucide-react';
-import { useGetServicesQuery } from '@/redux/features/services/servicesApi';
 import { useSendInviteMutation } from '@/redux/features/team-member/teamMemberApi';
 import { ITeamPermissions } from '@/types/user.interface';
 import ApiError from '@/components/shared/ApiError';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 
-interface TService {
-    name: string;
-    price: number;
-}
-
 export default function RootInviteTeamMember() {
-    const { user, isLoading: isUserDataLoading } = useLoggedInUser();
-    const { data, isLoading } = useGetServicesQuery({});
-
-    const services = useMemo<TService[]>(() => {
-        if (isUserDataLoading || isLoading) return [];
-
-        const fromUser = (user?.services as TService[]) ?? [];
-        const fromApi = (data?.data?.services as TService[]) ?? [];
-
-        const base = fromUser.length ? fromUser : fromApi;
-
-        const seen = new Set<string>();
-        return base.filter((s) => {
-            if (seen.has(s.name)) return false;
-            seen.add(s.name);
-            return true;
-        });
-    }, [isUserDataLoading, isLoading, data, user]);
+    const { user } = useLoggedInUser();
 
     const [email, setEmail] = useState('');
     const [permissions, setPermissions] = useState<ITeamPermissions>({
@@ -54,9 +31,6 @@ export default function RootInviteTeamMember() {
         createOrders: false,
         exportInvoices: false,
     });
-
-    const [grantAllServices, setGrantAllServices] = useState(true);
-    const [selectedService, setSelectedService] = useState<TService[]>([]);
 
     const [inviteUrl, setInviteUrl] = useState('');
     const [copied, setCopied] = useState(false);
@@ -78,21 +52,6 @@ export default function RootInviteTeamMember() {
         value: boolean | string
     ) => {
         setPermissions((prev) => ({ ...prev, [key]: !!value }));
-    };
-
-    const onToggleService = (svc: TService, checked: boolean | string) => {
-        const isChecked = !!checked;
-        setSelectedService((prev) => {
-            const exists = prev.some((p) => p.name === svc.name);
-            if (isChecked) {
-                return exists
-                    ? prev.map((p) =>
-                          p.name === svc.name ? { ...p, price: svc.price } : p
-                      )
-                    : [...prev, { name: svc.name, price: svc.price }];
-            }
-            return prev.filter((p) => p.name !== svc.name);
-        });
     };
 
     const generateInviteUrl = () => {
@@ -117,15 +76,6 @@ export default function RootInviteTeamMember() {
             params.set('token', Math.random().toString(36).slice(2));
         }
 
-        // Determine services param
-        if (grantAllServices) {
-            params.set('services', JSON.stringify(services));
-        } else if (selectedService.length) {
-            params.set('services', JSON.stringify(selectedService));
-        } else {
-            params.set('services', '[]');
-        }
-
         setInviteUrl(`${inviteBase}?${params.toString()}`);
         setCopied(false);
     };
@@ -145,7 +95,6 @@ export default function RootInviteTeamMember() {
                 inviteUrl,
                 ownerUserID: user.userID,
                 permissions,
-                services: grantAllServices ? services : selectedService,
             }).unwrap();
 
             if (res.success) {
@@ -165,21 +114,16 @@ export default function RootInviteTeamMember() {
             createOrders: false,
             exportInvoices: false,
         });
-        setGrantAllServices(true);
-        setSelectedService([]);
         setInviteUrl('');
         setCopied(false);
     };
-
-    const canGenerate = grantAllServices || selectedService.length > 0;
 
     return (
         <Card className="max-w-2xl mx-auto">
             <CardHeader>
                 <CardTitle className="text-2xl">Invite Team Member</CardTitle>
                 <CardDescription>
-                    Define access, choose service scope, generate an invitation
-                    link, and optionally email it directly.
+                    Define access permissions, generate an invitation link, and optionally email it directly.
                 </CardDescription>
             </CardHeader>
 
@@ -247,90 +191,15 @@ export default function RootInviteTeamMember() {
                     </div>
                 </div>
 
-                {/* Services scope */}
-                <div className="space-y-4">
-                    <h3 className="text-base font-semibold">Service scope</h3>
-
-                    <Label className="flex items-center gap-3">
-                        <Checkbox
-                            id="grant-all-services"
-                            checked={grantAllServices}
-                            onCheckedChange={(v) => {
-                                const checked = !!v;
-                                setGrantAllServices(checked);
-                                if (checked) setSelectedService([]);
-                            }}
-                        />
-                        <span>Grant access to all services</span>
-                    </Label>
-
-                    {!grantAllServices && (
-                        <div className="space-y-3">
-                            <Label className="block">
-                                Select services to grant
-                            </Label>
-
-                            {isLoading ? (
-                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                    Loading services…
-                                </div>
-                            ) : (
-                                <div className="space-y-3 max-h-96 overflow-y-auto border p-3 rounded-md">
-                                    {services.length > 0 ? (
-                                        services.map((svc) => {
-                                            const selected =
-                                                selectedService.some(
-                                                    (s) => s.name === svc.name
-                                                );
-                                            return (
-                                                <div
-                                                    key={svc.name}
-                                                    className="border-b pb-2 last:border-none"
-                                                >
-                                                    <Label className="flex items-center gap-3 cursor-pointer">
-                                                        <Checkbox
-                                                            id={`svc-${svc.name}`}
-                                                            checked={selected}
-                                                            onCheckedChange={(
-                                                                v
-                                                            ) =>
-                                                                onToggleService(
-                                                                    svc,
-                                                                    v
-                                                                )
-                                                            }
-                                                        />
-                                                        <span>{svc.name}</span>
-                                                    </Label>
-                                                </div>
-                                            );
-                                        })
-                                    ) : (
-                                        <p className="text-sm text-muted-foreground">
-                                            No services found.
-                                        </p>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    )}
-                </div>
-
                 {/* Generate link */}
                 <div className="flex items-center gap-3">
                     <Button
                         type="button"
                         onClick={generateInviteUrl}
-                        disabled={!user?.userID || !canGenerate}
+                        disabled={!user?.userID}
                     >
                         Generate invitation link
                     </Button>
-                    {!canGenerate && !grantAllServices && (
-                        <p className="text-sm text-destructive">
-                            Select at least one service.
-                        </p>
-                    )}
                 </div>
 
                 {/* Link display + copy */}
@@ -352,7 +221,7 @@ export default function RootInviteTeamMember() {
                             </Button>
                             <Button type="button" variant="secondary">
                                 <Link href={inviteUrl} target="_blank">
-                                    <ExternalLink />
+                                    <ExternalLink className="h-4 w-4" />
                                 </Link>
                             </Button>
                         </div>
@@ -367,9 +236,9 @@ export default function RootInviteTeamMember() {
                     disabled={!email || !inviteUrl || isSending}
                 >
                     {isSending ? (
-                        <Loader2 className="animate-spin" />
+                        <Loader2 className="animate-spin h-4 w-4 mr-2" />
                     ) : (
-                        <Send />
+                        <Send className="h-4 w-4 mr-2" />
                     )}
                     {isSending ? 'Sending…' : 'Send by email'}
                 </Button>

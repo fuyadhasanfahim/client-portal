@@ -3,8 +3,8 @@
 import React from 'react';
 
 import useLoggedInUser from '@/utils/getLoggedInUser';
-import VerificationAlert from '../VerificationAlert';
-import AdditionalInformationAlert from '../AdditionalInformationAlert';
+import VerificationAlert from './VerificationAlert';
+import AdditionalInformationAlert from './AdditionalInformationAlert';
 import { Loader2 } from 'lucide-react';
 
 export default function InfoAlert({ children }: { children: React.ReactNode }) {
@@ -15,8 +15,8 @@ export default function InfoAlert({ children }: { children: React.ReactNode }) {
             <Loader2 className="animate-spin" />
         </div>
     ) : !user?.isEmailVerified ? (
-        <VerificationAlert email={user.email} />
-    ) : !user?.address || !user.phone ? (
+        <VerificationAlert email={user?.email || ''} />
+    ) : !user?.address || !user?.phone ? (
         <AdditionalInformationAlert />
     ) : (
         children

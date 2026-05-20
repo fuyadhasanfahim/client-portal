@@ -22,7 +22,7 @@ export default function QuoteStats({
             value:
                 !isLoading &&
                 quotes.filter((quote) =>
-                    ['in-progress', 'in-revision', 'delivered'].includes(
+                    ['in_progress', 'in_review', 'delivered'].includes(
                         quote.status
                     )
                 ).length,
@@ -54,7 +54,7 @@ export default function QuoteStats({
             title: 'Canceled Quotes',
             value:
                 !isLoading &&
-                quotes.filter((quote) => ['canceled'].includes(quote.status))
+                quotes.filter((quote) => ['cancelled'].includes(quote.status))
                     .length,
             icon: IconPackageOff,
             color: 'from-orange-500 to-red-600',

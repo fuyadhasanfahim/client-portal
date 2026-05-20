@@ -39,7 +39,7 @@ function renderOrderStageAction(order: IOrder) {
     const baseClass = 'flex items-center justify-center gap-1 group';
 
     switch (order.orderStage) {
-        case 'services-selected':
+        case 'draft':
             return (
                 <Link
                     href={`/orders/new-order/details/${order.orderID}`}
@@ -167,7 +167,7 @@ export default function RootDraft() {
                                     'paid',
                                     'payment-failed',
                                     'refunded',
-                                    'canceled',
+                                    'cancelled',
                                 ].map((val) => (
                                     <SelectItem
                                         key={val}
@@ -217,7 +217,7 @@ export default function RootDraft() {
                             {[
                                 'Order ID',
                                 'Client',
-                                'Services',
+                                'Title',
                                 'Total ($)',
                                 'Payment ($)',
                                 'Order Status',
@@ -279,7 +279,7 @@ export default function RootDraft() {
                                                     className={cn(
                                                         'text-primary underline',
                                                         order.status ===
-                                                            'canceled' &&
+                                                            'cancelled' &&
                                                             'text-destructive'
                                                     )}
                                                 >
@@ -290,39 +290,20 @@ export default function RootDraft() {
                                                 className={cn(
                                                     'text-center text-sm border-r',
                                                     order.status ===
-                                                        'canceled' &&
+                                                        'cancelled' &&
                                                         'text-destructive'
                                                 )}
                                             >
                                                 {order.user.userID}
                                             </TableCell>
-                                            <TableCell
-                                                className={cn(
-                                                    'text-start text-sm border-r',
-                                                    order.status ===
-                                                        'canceled' &&
-                                                        'text-destructive'
-                                                )}
-                                            >
-                                                <ul className="list-decimal list-inside space-y-1">
-                                                    {order.services.map(
-                                                        (service) => (
-                                                            <li
-                                                                key={
-                                                                    service.name
-                                                                }
-                                                            >
-                                                                {service.name}
-                                                            </li>
-                                                        )
-                                                    )}
-                                                </ul>
+                                            <TableCell className="text-start text-sm border-r">
+                                                {order.title}
                                             </TableCell>
                                             <TableCell
                                                 className={cn(
                                                     'text-center text-sm border-r',
                                                     order.status ===
-                                                        'canceled' &&
+                                                        'cancelled' &&
                                                         'text-destructive'
                                                 )}
                                             >
@@ -332,7 +313,7 @@ export default function RootDraft() {
                                                 className={cn(
                                                     'text-center capitalize text-sm border-r',
                                                     order.status ===
-                                                        'canceled' &&
+                                                        'cancelled' &&
                                                         'text-destructive'
                                                 )}
                                             >

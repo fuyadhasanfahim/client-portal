@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import cloudinary from "../lib/cloudinary.js";
-import ConversationModel from "../models/conversation.model.js";
 import UserModel from "../models/user.model.js";
 import { ISanitizedUser, IUser } from "../types/user.interface.js";
 import getSanitizeUserData from "../utils/getSanitizeUserData.js";
@@ -13,16 +12,7 @@ async function getMeFromDB(userID: string) {
         throw new Error(`User with ID ${userID} not found.`);
     }
 
-    const conversation = await ConversationModel.findOne({
-        participants: { $elemMatch: { userID: userID } },
-    });
-
-    const dataToSanitize = {
-        ...user.toObject(),
-        conversationID: conversation?._id ? String(conversation._id) : undefined,
-    };
-
-    const sanitizedData = await getSanitizeUserData(dataToSanitize);
+    const sanitizedData = await getSanitizeUserData(user.toObject());
 
     return sanitizedData;
 }

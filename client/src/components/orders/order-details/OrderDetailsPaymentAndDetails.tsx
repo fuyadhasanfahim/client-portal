@@ -86,7 +86,7 @@ export default function OrderDetailsPaymentAndDetails({
 
     const canDeliver =
         role !== 'user' &&
-        (status === 'in-progress' || status === 'in-revision');
+        (status === 'in_progress' || status === 'in_review');
 
     const needsPayLaterCheckout =
         orderUser.userID === user?.userID &&

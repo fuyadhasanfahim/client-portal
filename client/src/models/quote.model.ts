@@ -1,10 +1,7 @@
-import { model, models, Schema } from 'mongoose';
+import { Schema, model, models } from 'mongoose';
 import {
     IQuote,
     IQuoteDetails,
-    IQuoteServiceComplexity,
-    IQuoteServiceSelection,
-    IQuoteServiceType,
     IQuoteUser,
 } from '../types/quote.interface';
 
@@ -39,77 +36,6 @@ const QuoteUserSchema = new Schema<IQuoteUser>(
     }
 );
 
-const QuoteServiceComplexitySchema = new Schema<IQuoteServiceComplexity>(
-    {
-        _id: {
-            type: String,
-            required: true,
-        },
-        name: {
-            type: String,
-            required: true,
-        },
-    },
-    {
-        timestamps: true,
-    }
-);
-
-const QuoteServiceTypeSchema = new Schema<IQuoteServiceType>(
-    {
-        _id: {
-            type: String,
-            required: true,
-        },
-        name: {
-            type: String,
-            required: true,
-        },
-        complexity: {
-            type: QuoteServiceComplexitySchema,
-            required: false,
-        },
-    },
-    {
-        timestamps: true,
-    }
-);
-
-const QuoteServiceSelectionSchema = new Schema<IQuoteServiceSelection>(
-    {
-        _id: {
-            type: String,
-            required: true,
-        },
-        name: {
-            type: String,
-            required: true,
-        },
-        colorCodes: {
-            type: [String],
-            required: false,
-        },
-        options: {
-            type: [String],
-            required: false,
-        },
-        types: {
-            type: [QuoteServiceTypeSchema],
-            required: false,
-        },
-        complexity: {
-            type: QuoteServiceComplexitySchema,
-            required: false,
-        },
-        disabledOptions: {
-            type: [String],
-            required: false,
-        },
-    },
-    {
-        timestamps: true,
-    }
-);
 const QuoteDetailsSchema = new Schema<IQuoteDetails>(
     {
         deliveryDate: {
@@ -172,8 +98,8 @@ const QuoteSchema = new Schema<IQuote>(
             type: QuoteUserSchema,
             required: true,
         },
-        services: {
-            type: [QuoteServiceSelectionSchema],
+        title: {
+            type: String,
             required: true,
         },
         details: {
@@ -188,17 +114,17 @@ const QuoteSchema = new Schema<IQuote>(
             type: String,
             enum: [
                 'pending',
-                'in-progress',
-                'delivered',
-                'in-revision',
+                'in_progress',
+                'in_review',
                 'completed',
-                'canceled',
+                'delivered',
+                'cancelled',
             ],
             required: true,
         },
         quoteStage: {
             type: String,
-            enum: ['draft', 'services-selected', 'details-provided'],
+            enum: ['draft', 'details-provided'],
             required: true,
         },
     },

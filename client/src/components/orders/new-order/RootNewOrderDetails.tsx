@@ -10,7 +10,6 @@ import {
 } from '@/components/ui/card';
 import { useGetOrderByIDQuery } from '@/redux/features/orders/ordersApi';
 import OrderDetails from '@/components/orders/new-order/OrderDetails';
-import SelectedServicesCard from '@/components/orders/new-order/SelectedServicesCard';
 import SelectedServiceLoadingCard from './SelectedServiceLoadingCard';
 import { AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -53,21 +52,54 @@ export default function RootNewOrderDetails({ orderID }: { orderID: string }) {
             </Card>
         );
     } else {
+        const order = data.data;
         content = (
-            <Card className="max-w-2xl">
+            <Card className="max-w-2xl border border-muted-foreground/10 bg-card/70 backdrop-blur-xl shadow-lg rounded-xl">
                 <CardHeader>
-                    <CardTitle className="text-2xl">
-                        Selected Services
+                    <CardTitle className="text-2xl font-bold bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent">
+                        Order Specifications
                     </CardTitle>
-                    <CardDescription>
-                        Here are the services you selected. If you need to make
-                        any changes, please go back to the previous step.
+                    <CardDescription className="text-muted-foreground/90">
+                        Summary of the pricing model and item details for this order.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <SelectedServicesCard
-                        services={!isLoading && data.data.services}
-                    />
+                    <div className="space-y-3">
+                        <div className="flex flex-col gap-1">
+                            <span className="text-xs uppercase tracking-wider font-bold text-muted-foreground/75">
+                                Order Item
+                            </span>
+                            <span className="text-base font-semibold text-foreground">
+                                {order.title}
+                            </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4 border-t border-muted-foreground/5 pt-3">
+                            <div className="flex flex-col gap-0.5">
+                                <span className="text-xs font-semibold text-muted-foreground/80">
+                                    Images Count
+                                </span>
+                                <span className="text-sm font-bold text-foreground">
+                                    {order.imagesCount}
+                                </span>
+                            </div>
+                            <div className="flex flex-col gap-0.5">
+                                <span className="text-xs font-semibold text-muted-foreground/80">
+                                    Rate Model
+                                </span>
+                                <span className="text-sm font-bold text-foreground capitalize">
+                                    {order.pricingType === 'per-image'
+                                        ? `$${order.price.toFixed(2)} / image`
+                                        : 'Flat Rate'}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="border-t border-muted-foreground/5 pt-3 flex justify-between items-center text-lg font-semibold text-foreground">
+                            <span>Estimated Total:</span>
+                            <span className="text-2xl font-black text-primary">
+                                ${order.total.toFixed(2)}
+                            </span>
+                        </div>
+                    </div>
                 </CardContent>
             </Card>
         );

@@ -13,7 +13,10 @@ async function newOrder(req: Request, res: Response) {
         const { orderStage } = req.params as any;
         const {
             userID,
-            services,
+            title,
+            pricingType,
+            price,
+            imagesCount,
             orderID,
             details,
             total,
@@ -32,7 +35,10 @@ async function newOrder(req: Request, res: Response) {
         const order = await OrderServices.newOrderInDB({
             orderStage,
             userID,
-            services,
+            title,
+            pricingType,
+            price,
+            imagesCount,
             orderID,
             details,
             total,
@@ -207,7 +213,7 @@ async function updateOrder(req: Request, res: Response) {
             return;
         }
 
-        if (updatedOrder.status === "in-progress") {
+        if (updatedOrder.status === "in_progress") {
             await sendNotification({
                 userID: updatedOrder.user.userID,
                 title: `🎁 Order #${orderID} Accepted`,

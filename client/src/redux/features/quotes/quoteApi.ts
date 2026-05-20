@@ -8,13 +8,13 @@ export const quotesApi = apiSlice.injectEndpoints({
                 query: ({
                     quoteStage,
                     userID,
-                    services,
+                    title,
                     quoteID,
                     details,
                 }: {
                     quoteStage: string;
                     userID: string;
-                    services?: IQuote['services'];
+                    title?: string;
                     quoteID?: string;
                     details?: IQuote['details'];
                 }) => ({
@@ -22,7 +22,7 @@ export const quotesApi = apiSlice.injectEndpoints({
                     method: 'POST',
                     body: {
                         userID,
-                        services,
+                        title,
                         quoteID,
                         details,
                     },
@@ -101,7 +101,7 @@ export const quotesApi = apiSlice.injectEndpoints({
             }),
             getQuotesByUserID: builder.query({
                 query: ({ userID, search, page, limit, filter, sort }) => ({
-                    url: 'orders/get-quotes-by-user',
+                    url: 'quotes/get-quotes-by-user',
                     method: 'GET',
                     params: {
                         userID,
@@ -112,7 +112,7 @@ export const quotesApi = apiSlice.injectEndpoints({
                         sort,
                     },
                 }),
-                providesTags: ['Orders'],
+                providesTags: ['Quotes'],
             }),
         };
     },

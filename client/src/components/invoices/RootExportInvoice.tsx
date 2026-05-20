@@ -484,12 +484,7 @@ export default function RootExportInvoice() {
                                                                     .email}
                                                         </p>
                                                         <p className="text-sm text-muted-foreground truncate max-w-[200px]">
-                                                            {order.services
-                                                                .map(
-                                                                    (s) =>
-                                                                        s.name
-                                                                )
-                                                                .join(', ')}
+                                                            {order.title}
                                                         </p>
                                                         <div className="flex flex-col items-end">
                                                             <span className="font-medium">
@@ -508,7 +503,7 @@ export default function RootExportInvoice() {
                                                                           'pending'
                                                                         ? 'secondary'
                                                                         : order.paymentStatus ===
-                                                                          'payment-failed'
+                                                                          'failed'
                                                                         ? 'destructive'
                                                                         : 'outline'
                                                                 }

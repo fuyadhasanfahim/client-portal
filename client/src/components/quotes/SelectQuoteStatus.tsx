@@ -2,7 +2,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { OrderStatusData } from '@/data/orders';
+import { OrderStatusData, statusData } from '@/data/orders';
 import { Button } from '../ui/button';
 import ApiError from '../shared/ApiError';
 import toast from 'react-hot-toast';
@@ -33,7 +33,7 @@ export default function SelectQuoteStatus({
 }: SelectQuoteStatusProps) {
     const { user } = useLoggedInUser();
 
-    const item = OrderStatusData.find((item) => item.value === quote.status);
+    const item = statusData.find((item) => item.value === quote.status);
     const [updateQuote, { isLoading }] = useUpdateQuoteMutation();
 
     const handleQuoteStatusChange = async ({
@@ -115,7 +115,7 @@ export default function SelectQuoteStatus({
                                 onClick={() =>
                                     handleQuoteStatusChange({
                                         quoteID,
-                                        status: 'canceled',
+                                        status: 'cancelled',
                                     })
                                 }
                             >
@@ -134,7 +134,7 @@ export default function SelectQuoteStatus({
                                 onClick={() =>
                                     handleQuoteStatusChange({
                                         quoteID,
-                                        status: 'in-progress',
+                                        status: 'in_progress',
                                     })
                                 }
                             >

@@ -7,18 +7,12 @@ export const apiSlice = createApi({
         credentials: 'include',
     }),
     tagTypes: [
-        'Services',
         'Users',
         'Orders',
         'Quotes',
         'Revisions',
         'Payments',
-        'Notifications',
-        'Messages',
-        'Conversations',
-        'AdditionalService',
-        'Job',
-        'Applicant'
+        'Notifications'
     ],
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     endpoints: (_builder) => ({}),

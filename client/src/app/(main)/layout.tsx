@@ -3,8 +3,7 @@ import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import NextAuthProvider from '../../components/providers/NextAuthProvider';
 import { AppSidebar } from '@/components/shared/app-sidebar';
 import { SiteHeader } from '@/components/shared/site-header';
-import MessagesFabProvider from '@/components/providers/MessagesFabProvider';
-import InfoAlert from '@/components/shared/FloatingMessages/InfoAlert';
+import InfoAlert from '@/components/shared/InfoAlert';
 import RouteGuard from '@/components/shared/RouteGuard';
 
 export const metadata: Metadata = {
@@ -34,7 +33,6 @@ export default async function Layout({
                         <main className="p-4">
                             <InfoAlert>{children}</InfoAlert>
                         </main>
-                        <MessagesFabProvider />
                     </SidebarInset>
                 </SidebarProvider>
             </RouteGuard>

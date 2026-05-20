@@ -12,17 +12,17 @@ export default function QuoteDetailsStatus({
 
     const getStatusCard = () => {
         switch (status) {
-            case 'in-revision':
+            case 'in_review':
                 return {
                     color: 'yellow',
                     title: isCustomer
-                        ? 'Your quote is under revision'
-                        : 'Quote marked as "In Revision"',
+                        ? 'Your quote is under review'
+                        : 'Quote marked as "In Review"',
                     message: isCustomer
-                        ? 'Our team is working on the requested changes.'
-                        : `You marked the quote for revision. Awaiting updated submission.`,
+                        ? 'Our team is working on the requested changes or reviewing it.'
+                        : `You marked the quote for review. Awaiting updated submission.`,
                 };
-            case 'in-progress':
+            case 'in_progress':
                 return {
                     color: 'blue',
                     title: isCustomer

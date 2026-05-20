@@ -5,7 +5,6 @@ import UserModel from "../models/user.model.js";
 import {
     IOrder,
     IOrderDetails,
-    IOrderServiceSelection,
 } from "../types/order.interface.js";
 import { IPayment } from "../types/payment.interface.js";
 import RevisionModel from "../models/revision.model.js";
@@ -13,16 +12,22 @@ import RevisionModel from "../models/revision.model.js";
 async function newOrderInDB({
     orderStage,
     userID,
-    services,
+    title,
+    pricingType,
+    price,
+    imagesCount,
     orderID,
     details,
     total,
     payment,
     paymentStatus,
 }: {
-    orderStage: string;
+    orderStage: any;
     userID?: string;
-    services?: IOrderServiceSelection[];
+    title?: string;
+    pricingType?: "per-image" | "total";
+    price?: number;
+    imagesCount?: number;
     orderID?: string;
     details?: IOrderDetails;
     total?: number;
@@ -36,7 +41,8 @@ async function newOrderInDB({
 
         let order;
 
-        if (orderStage === "services-selected" && services) {
+        if (!orderID) {
+            // Create a brand new order in one step
             order = await OrderModel.create({
                 orderID: `WBO${nanoid(10).toUpperCase()}`,
                 user: {
@@ -47,75 +53,65 @@ async function newOrderInDB({
                     company: user.company,
                     address: user.address,
                 },
-                services,
-                orderStage,
+                title: title || "New Order",
+                pricingType: pricingType || "per-image",
+                price: price || 0,
+                imagesCount: imagesCount || 0,
+                details: details || {},
+                total: total || 0,
+                orderStage: orderStage || "details-provided",
                 paymentStatus: "pending",
                 status: "pending",
             });
-        }
-
-        if (orderStage === "details-provided" && orderID && details) {
-            order = await OrderModel.findOneAndUpdate(
-                { orderID },
-                {
-                    details,
-                    orderStage,
-                    total,
-                },
-                { new: true }
-            );
-        }
-
-        if (orderStage === "details-provided" && orderID && total) {
-            order = await OrderModel.findOneAndUpdate(
-                { orderID },
-                {
-                    orderStage,
-                    total,
-                },
-                { new: true }
-            );
-        }
-
-        // Handle regular payment completion (with Stripe/payment gateway)
-        if (orderStage === "payment-completed" && orderID && payment) {
-            console.log("ordering as clients client...");
-
-            order = await OrderModel.findOneAndUpdate(
-                { orderID },
-                {
-                    paymentID: payment.paymentID,
-                    paymentStatus:
-                        payment.status === "succeeded"
-                            ? "paid"
-                            : payment.status,
-                    status:
-                        payment.status === "succeeded"
-                            ? "in-progress"
-                            : "pending",
-                    orderStage,
-                },
-                { new: true }
-            );
-        }
-
-        // Handle pay-later case (team members without view prices permission)
-        if (
-            orderStage === "payment-completed" &&
-            orderID &&
-            paymentStatus === "pay-later"
-        ) {
-            order = await OrderModel.findOneAndUpdate(
-                { orderID },
-                {
-                    details,
-                    total,
-                    paymentStatus,
-                    status: "pending",
-                    orderStage,
-                },
-                { new: true }
-            );
+        } else {
+            // Handle updating existing draft/order stage
+            if (orderStage === "payment-completed") {
+                if (payment) {
+                    order = await OrderModel.findOneAndUpdate(
+                        { orderID },
+                        {
+                            paymentID: payment.paymentID,
+                            paymentStatus:
+                                payment.status === "succeeded"
+                                    ? "paid"
+                                    : payment.status,
+                            status:
+                                payment.status === "succeeded"
+                                    ? "in_progress"
+                                    : "pending",
+                            orderStage,
+                        },
+                        { new: true }
+                    );
+                } else if (paymentStatus === "pay-later") {
+                    order = await OrderModel.findOneAndUpdate(
+                        { orderID },
+                        {
+                            details,
+                            total,
+                            paymentStatus,
+                            status: "pending",
+                            orderStage,
+                        },
+                        { new: true }
+                    );
+                }
+            } else {
+                // General update
+                order = await OrderModel.findOneAndUpdate(
+                    { orderID },
+                    {
+                        title,
+                        pricingType,
+                        price,
+                        imagesCount,
+                        details,
+                        total,
+                        orderStage,
+                    },
+                    { new: true }
+                );
+            }
         }
 
         return order;
@@ -307,7 +303,7 @@ async function reviewOrderToAdmin({
 }) {
     const order = await OrderModel.findOneAndUpdate(
         { orderID },
-        { status: "in-revision", isRevision: true },
+        { status: "in_review", isRevision: true },
         { new: true }
     );
     if (!order) throw new Error("Order not found");

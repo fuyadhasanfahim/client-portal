@@ -1,3 +1,6 @@
+'use client';
+
+import React from 'react';
 import {
     Card,
     CardContent,
@@ -6,159 +9,73 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { IOrderServiceSelection } from '@/types/order.interface';
+import { IOrder } from '@/types/order.interface';
 import { IconBriefcaseFilled } from '@tabler/icons-react';
 import Link from 'next/link';
 
 interface OrderDetailsServiceListProps {
-    services: IOrderServiceSelection[];
-    images?: number;
-    imageResizing?: 'yes' | 'no';
-    width?: number;
-    height?: number;
-    backgroundOption?: string[];
-    returnFileFormat?: string[];
-    backgroundColor?: string[];
-    instructions?: string;
-    downloadLink?: string;
-    deliveryLink?: string;
+    order: IOrder;
 }
 
 export default function OrderDetailsServiceList({
-    services,
-    images,
-    imageResizing,
-    width,
-    height,
-    backgroundOption,
-    returnFileFormat,
-    instructions,
-    backgroundColor,
-    downloadLink,
+    order,
 }: OrderDetailsServiceListProps) {
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle className="text-2xl flex items-center gap-2">
+        <Card className="border border-border/50 bg-background/50 backdrop-blur-sm shadow-md">
+            <CardHeader className="border-b border-border/50">
+                <CardTitle className="text-xl flex items-center gap-2 font-semibold">
                     <IconBriefcaseFilled
-                        size={24}
-                        className="text-destructive"
+                        size={22}
+                        className="text-primary"
                     />
-                    Services Ordered
+                    Order Specifications
                 </CardTitle>
-                <CardDescription>All service and file details</CardDescription>
+                <CardDescription>Details of the request and pricing parameters</CardDescription>
             </CardHeader>
 
-            <CardContent className="space-y-6">
-                {services.map((service, index) => (
-                    <div key={index}>
-                        <CardHeader>
-                            <CardTitle className="text-lg">
-                                {index + 1}. {service.name}
-                            </CardTitle>
-                            {(service.types ?? []).length > 0 && (
-                                <div>
-                                    <p className="font-semibold text-muted-foreground mb-1">
-                                        Types:
-                                    </p>
-                                    <ul className="ml-4 list-disc text-sm space-y-1">
-                                        {service.types?.map((type) => (
-                                            <li key={type._id}>
-                                                {type.name}
-                                                {type.price &&
-                                                    ` - $${type.price}`}
-                                                {type.complexity && (
-                                                    <span className="ml-1 text-xs text-gray-500">
-                                                        (Complexity:{' '}
-                                                        {type.complexity.name} -
-                                                        ${type.complexity.price}
-                                                        )
-                                                    </span>
-                                                )}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
-
-                            {service.complexity && (
-                                <div>
-                                    <p className="font-semibold text-muted-foreground">
-                                        Selected Complexity:
-                                    </p>
-                                    <p className="ml-4">
-                                        {service.complexity.name} - $
-                                        {service.complexity.price}
-                                    </p>
-                                </div>
-                            )}
-                        </CardHeader>
-
-                        <CardContent className="text-sm space-y-2">
-                            <ul className="list-inside list-disc">
-                                <li>
-                                    <strong>Images:</strong> {images || 0}{' '}
-                                    images
-                                </li>
-                                <li>
-                                    <strong>Return Format:</strong>{' '}
-                                    {returnFileFormat
-                                        ?.map((rf) => rf)
-                                        .join(', ') || 'N/A'}
-                                </li>
-                                <li>
-                                    <strong>Background Option:</strong>{' '}
-                                    {backgroundOption
-                                        ?.map((bg) => bg)
-                                        .join(', ') || 'N/A'}
-                                </li>
-                                {backgroundColor && (
-                                    <li>
-                                        <strong>Background Colors:</strong>{' '}
-                                        {backgroundColor
-                                            ?.map((bgc) => bgc)
-                                            .join(', ') || 'N/A'}
-                                    </li>
-                                )}
-                                <li>
-                                    <strong>Resize:</strong>{' '}
-                                    {imageResizing === 'yes'
-                                        ? `${width}px x ${height}px`
-                                        : 'Not requested'}
-                                </li>
-                                {(service.colorCodes ?? []).length > 0 && (
-                                    <li>
-                                        <strong>Color Codes:</strong>{' '}
-                                        {service.colorCodes?.join(', ')}
-                                    </li>
-                                )}
-                            </ul>
-                        </CardContent>
+            <CardContent className="py-6 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-1">
+                        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Order Title</span>
+                        <p className="text-base font-medium">{order.title}</p>
                     </div>
-                ))}
+                    <div className="space-y-1">
+                        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Pricing Type</span>
+                        <p className="text-base capitalize font-medium">{order.pricingType === 'per-image' ? 'Per Image' : 'Fixed Total'}</p>
+                    </div>
+                    <div className="space-y-1">
+                        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Unit Price</span>
+                        <p className="text-base font-medium">${order.price?.toFixed(2)}</p>
+                    </div>
+                    <div className="space-y-1">
+                        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Images Count</span>
+                        <p className="text-base font-medium">{order.imagesCount} images</p>
+                    </div>
+                </div>
 
-                <div>
-                    <strong>Download Link:</strong>{' '}
-                    {downloadLink ? (
+                <div className="border-t border-border/50 pt-4">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-2">Assets / Source Files</span>
+                    {order.details?.downloadLink ? (
                         <Link
-                            href={downloadLink!}
+                            href={order.details.downloadLink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline"
+                            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 h-9 px-4 py-2"
                         >
-                            Download Images
+                            View / Download Source Files
                         </Link>
                     ) : (
-                        'N/A'
+                        <p className="text-sm text-muted-foreground italic">No link provided</p>
                     )}
                 </div>
             </CardContent>
-            <CardFooter>
-                <div>
-                    <p className="font-semibold mb-1">Instructions:</p>
-                    <CardDescription>
-                        {instructions || 'No instructions provided.'}
-                    </CardDescription>
+
+            <CardFooter className="border-t border-border/50 pt-4 bg-muted/20">
+                <div className="w-full">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1">Instructions / Notes</span>
+                    <p className="text-sm text-foreground whitespace-pre-wrap">
+                        {order.details?.instructions || 'No special instructions provided.'}
+                    </p>
                 </div>
             </CardFooter>
         </Card>

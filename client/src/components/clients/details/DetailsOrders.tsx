@@ -147,7 +147,7 @@ export default function DetailsOrders({ userID }: { userID: string }) {
                                     'paid',
                                     'payment-failed',
                                     'refunded',
-                                    'canceled',
+                                    'cancelled',
                                 ].map((val) => (
                                     <SelectItem
                                         key={val}
@@ -197,7 +197,7 @@ export default function DetailsOrders({ userID }: { userID: string }) {
                             {[
                                 'Order ID',
                                 'Client',
-                                'Services',
+                                'Title',
                                 'Total ($)',
                                 'Payment ($)',
                                 'Order Status',
@@ -259,7 +259,7 @@ export default function DetailsOrders({ userID }: { userID: string }) {
                                                     className={cn(
                                                         'text-primary underline',
                                                         order.status ===
-                                                            'canceled' &&
+                                                            'cancelled' &&
                                                             'text-destructive'
                                                     )}
                                                 >
@@ -270,7 +270,7 @@ export default function DetailsOrders({ userID }: { userID: string }) {
                                                 className={cn(
                                                     'text-center text-sm border-r',
                                                     order.status ===
-                                                        'canceled' &&
+                                                        'cancelled' &&
                                                         'text-destructive'
                                                 )}
                                             >
@@ -280,29 +280,17 @@ export default function DetailsOrders({ userID }: { userID: string }) {
                                                 className={cn(
                                                     'text-start text-sm border-r',
                                                     order.status ===
-                                                        'canceled' &&
+                                                        'cancelled' &&
                                                         'text-destructive'
                                                 )}
                                             >
-                                                <ul className="list-decimal list-inside space-y-1">
-                                                    {order.services.map(
-                                                        (service) => (
-                                                            <li
-                                                                key={
-                                                                    service.name
-                                                                }
-                                                            >
-                                                                {service.name}
-                                                            </li>
-                                                        )
-                                                    )}
-                                                </ul>
+                                                {order.title}
                                             </TableCell>
                                             <TableCell
                                                 className={cn(
                                                     'text-center text-sm border-r',
                                                     order.status ===
-                                                        'canceled' &&
+                                                        'cancelled' &&
                                                         'text-destructive'
                                                 )}
                                             >
@@ -312,7 +300,7 @@ export default function DetailsOrders({ userID }: { userID: string }) {
                                                 className={cn(
                                                     'text-center capitalize text-sm border-r',
                                                     order.status ===
-                                                        'canceled' &&
+                                                        'cancelled' &&
                                                         'text-destructive'
                                                 )}
                                             >

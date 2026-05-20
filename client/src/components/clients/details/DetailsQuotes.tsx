@@ -147,7 +147,7 @@ export default function DetailsQuotes({ userID }: { userID: string }) {
                                     'paid',
                                     'payment-failed',
                                     'refunded',
-                                    'canceled',
+                                    'cancelled',
                                 ].map((val) => (
                                     <SelectItem
                                         key={val}
@@ -197,7 +197,7 @@ export default function DetailsQuotes({ userID }: { userID: string }) {
                             {[
                                 'Order ID',
                                 'Client',
-                                'Services',
+                                'Title',
                                 'Order Status',
                                 'Actions',
                             ].map((title, idx) => (
@@ -257,7 +257,7 @@ export default function DetailsQuotes({ userID }: { userID: string }) {
                                                     className={cn(
                                                         'text-primary underline',
                                                         quote.status ===
-                                                            'canceled' &&
+                                                            'cancelled' &&
                                                             'text-destructive'
                                                     )}
                                                 >
@@ -268,7 +268,7 @@ export default function DetailsQuotes({ userID }: { userID: string }) {
                                                 className={cn(
                                                     'text-center text-sm border-r',
                                                     quote.status ===
-                                                        'canceled' &&
+                                                        'cancelled' &&
                                                         'text-destructive'
                                                 )}
                                             >
@@ -278,23 +278,11 @@ export default function DetailsQuotes({ userID }: { userID: string }) {
                                                 className={cn(
                                                     'text-start text-sm border-r',
                                                     quote.status ===
-                                                        'canceled' &&
+                                                        'cancelled' &&
                                                         'text-destructive'
                                                 )}
                                             >
-                                                <ul className="list-decimal list-inside space-y-1">
-                                                    {quote.services.map(
-                                                        (service) => (
-                                                            <li
-                                                                key={
-                                                                    service.name
-                                                                }
-                                                            >
-                                                                {service.name}
-                                                            </li>
-                                                        )
-                                                    )}
-                                                </ul>
+                                                {quote.title}
                                             </TableCell>
                                             <TableCell className="text-center text-sm border-r">
                                                 <span

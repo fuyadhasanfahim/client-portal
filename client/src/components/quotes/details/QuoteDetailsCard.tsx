@@ -27,17 +27,9 @@ export default function QuoteDetailsCard({ quote }: { quote: IQuote }) {
                 <QuoteDetailsStatus status={quote.status} role={user.role} />
                 <QuoteDetailsSummary quote={quote} />
                 <QuoteDetailsServiceList
-                    backgroundOption={quote.details?.backgroundOption}
-                    height={quote.details?.height}
-                    imageResizing={
-                        quote.details?.imageResizing === true ? 'yes' : 'no'
-                    }
+                    title={quote.title}
                     images={quote.details?.images}
                     instructions={quote.details?.instructions}
-                    backgroundColor={quote.details?.backgroundColor}
-                    returnFileFormat={quote.details?.returnFileFormat}
-                    services={quote.services}
-                    width={quote.details?.width}
                     downloadLink={quote.details?.downloadLink}
                 />
             </div>

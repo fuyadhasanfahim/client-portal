@@ -19,7 +19,7 @@ export const statusData = [
     },
     {
         id: 2,
-        value: 'in-progress',
+        value: 'in_progress',
         icon: CircleDashed,
         text: '!text-blue-500',
         border: '!border-blue-500',
@@ -37,7 +37,7 @@ export const statusData = [
     },
     {
         id: 4,
-        value: 'in-revision',
+        value: 'in_review',
         icon: CircleQuestionMark,
         text: '!text-amber-500',
         border: '!border-amber-500',
@@ -55,7 +55,7 @@ export const statusData = [
     },
     {
         id: 6,
-        value: 'canceled',
+        value: 'cancelled',
         icon: CircleX,
         text: '!text-destructive',
         border: '!border-destructive',
@@ -74,8 +74,8 @@ export const OrderStatusData = [
         bg: '!bg-orange-50',
     },
     {
-        id: 'canceled',
-        value: 'canceled',
+        id: 'cancelled',
+        value: 'cancelled',
         icon: CircleX,
         text: '!text-destructive',
         border: '!border-destructive',

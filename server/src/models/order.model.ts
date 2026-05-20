@@ -3,9 +3,6 @@ import {
     IOrderUser,
     IOrder,
     IOrderDetails,
-    IOrderServiceComplexity,
-    IOrderServiceSelection,
-    IOrderServiceType,
 } from "../types/order.interface.js";
 
 const OrderUserSchema = new Schema<IOrderUser>(
@@ -16,35 +13,6 @@ const OrderUserSchema = new Schema<IOrderUser>(
         image: String,
         company: String,
         address: String,
-    },
-    { timestamps: true }
-);
-
-const OrderServiceComplexitySchema = new Schema<IOrderServiceComplexity>(
-    {
-        name: { type: String, required: true },
-        price: { type: Number, required: true },
-    },
-    { timestamps: true }
-);
-
-const OrderServiceTypeSchema = new Schema<IOrderServiceType>(
-    {
-        name: { type: String, required: true },
-        price: { type: Number },
-        complexity: { type: OrderServiceComplexitySchema },
-    },
-    { timestamps: true }
-);
-
-const OrderServiceSelectionSchema = new Schema<IOrderServiceSelection>(
-    {
-        name: { type: String, required: true },
-        price: { type: Number },
-        colorCodes: [{ type: String }],
-        options: [{ type: String }],
-        types: [OrderServiceTypeSchema],
-        complexity: { type: OrderServiceComplexitySchema },
     },
     { timestamps: true }
 );
@@ -73,10 +41,14 @@ export const OrderSchema = new Schema<IOrder>(
     {
         orderID: { type: String, required: true, unique: true },
         user: { type: OrderUserSchema, required: true },
-        services: { type: [OrderServiceSelectionSchema], required: true },
+        title: { type: String, required: true },
+        pricingType: { type: String, enum: ["per-image", "total"], required: true },
+        price: { type: Number, required: true },
+        imagesCount: { type: Number, required: true },
         details: { type: OrderDetailsSchema },
         total: {
             type: Number,
+            required: true,
         },
         isRevision: {
             type: Boolean,
@@ -86,18 +58,18 @@ export const OrderSchema = new Schema<IOrder>(
             type: String,
             enum: [
                 "pending",
-                "in-progress",
-                "delivered",
-                "in-revision",
+                "in_progress",
+                "in_review",
                 "completed",
-                "canceled",
+                "delivered",
+                "cancelled",
             ],
             default: "pending",
         },
         paymentID: { type: String },
         paymentStatus: {
             type: String,
-            enum: ["pending", "succeeded", "paid", "failed", "refunded"],
+            enum: ["pending", "succeeded", "paid", "failed", "refunded", "pay-later"],
             default: "pending",
         },
         refundID: {
@@ -107,7 +79,6 @@ export const OrderSchema = new Schema<IOrder>(
             type: String,
             enum: [
                 "draft",
-                "services-selected",
                 "details-provided",
                 "payment-completed",
             ],

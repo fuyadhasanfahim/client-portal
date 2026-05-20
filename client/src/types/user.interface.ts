@@ -25,11 +25,6 @@ export interface IUser {
 
     isExistingUser?: boolean;
     isTeamMember?: boolean;
-    services?: {
-        _id: string;
-        name: string;
-        price: number;
-    }[];
 
     ownerUserID?: string;
     teamPermissions?: ITeamPermissions;
@@ -69,17 +64,11 @@ export interface ISanitizedUser {
     isEmailVerified: boolean;
     isExistingUser?: boolean;
     isTeamMember?: boolean;
-    services?: {
-        _id: string;
-        name: string;
-        price: number;
-    }[];
     ownerUserID?: string;
     teamPermissions?: ITeamPermissions;
     currency?: string;
     lastLogin: Date;
     image?: string;
-    conversationID?: string;
     provider: string;
     lastSeenAt?: Date;
     isOnline?: boolean;

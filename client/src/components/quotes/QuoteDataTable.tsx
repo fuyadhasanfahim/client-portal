@@ -182,7 +182,7 @@ export default function QuoteDataTable({
                                     'paid',
                                     'payment-failed',
                                     'refunded',
-                                    'canceled',
+                                    'cancelled',
                                 ].map((val) => (
                                     <SelectItem
                                         key={val}
@@ -232,7 +232,7 @@ export default function QuoteDataTable({
                             {[
                                 'Quote ID',
                                 'Client',
-                                'Services',
+                                'Title',
                                 'Quote Status',
                                 'Actions',
                             ].map((title, idx) => (
@@ -287,7 +287,7 @@ export default function QuoteDataTable({
                                                 className={cn(
                                                     'text-primary underline',
                                                     quote.status ===
-                                                        'canceled' &&
+                                                        'cancelled' &&
                                                         'text-destructive'
                                                 )}
                                             >
@@ -297,7 +297,7 @@ export default function QuoteDataTable({
                                         <TableCell
                                             className={cn(
                                                 'text-center text-sm bquote-r',
-                                                quote.status === 'canceled' &&
+                                                quote.status === 'cancelled' &&
                                                     'text-destructive'
                                             )}
                                         >
@@ -306,19 +306,11 @@ export default function QuoteDataTable({
                                         <TableCell
                                             className={cn(
                                                 'text-start text-sm bquote-r',
-                                                quote.status === 'canceled' &&
+                                                quote.status === 'cancelled' &&
                                                     'text-destructive'
                                             )}
                                         >
-                                            <ul className="list-decimal list-inside space-y-1">
-                                                {quote.services.map(
-                                                    (service) => (
-                                                        <li key={service.name}>
-                                                            {service.name}
-                                                        </li>
-                                                    )
-                                                )}
-                                            </ul>
+                                            {quote.title}
                                         </TableCell>
                                         <TableCell className="text-center text-sm bquote-r">
                                             <span
@@ -336,31 +328,15 @@ export default function QuoteDataTable({
                                             </span>
                                         </TableCell>
                                         <TableCell className="text-center">
-                                            {quote.quoteStage ===
-                                            'details-provided' ? (
-                                                <Link
-                                                    href={`/quotes/details/${quote.quoteID!}`}
-                                                    className="flex items-center justify-center gap-1 group"
-                                                >
-                                                    <EyeIcon size={20} />
-                                                    <span className="group-hover:underline cursor-pointer">
-                                                        Details
-                                                    </span>
-                                                </Link>
-                                            ) : (
-                                                quote.quoteStage ===
-                                                    'services-selected' && (
-                                                    <Link
-                                                        href={`quotes/new-quote/details/${quote.quoteID!}`}
-                                                        className="flex items-center justify-center gap-1 group"
-                                                    >
-                                                        <ListChecks size={20} />
-                                                        <span className="group-hover:underline cursor-pointer">
-                                                            Provide Details
-                                                        </span>
-                                                    </Link>
-                                                )
-                                            )}
+                                            <Link
+                                                href={`/quotes/details/${quote.quoteID!}`}
+                                                className="flex items-center justify-center gap-1 group"
+                                            >
+                                                <EyeIcon size={20} />
+                                                <span className="group-hover:underline cursor-pointer">
+                                                    Details
+                                                </span>
+                                            </Link>
                                         </TableCell>
                                     </TableRow>
                                 );

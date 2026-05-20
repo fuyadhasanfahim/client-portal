@@ -8,7 +8,7 @@ import {
     TableCell,
 } from '@/components/ui/table';
 import Image from 'next/image';
-import { IQuote, IQuoteServiceSelection } from '@/types/quote.interface';
+import { IQuote } from '@/types/quote.interface';
 
 export default function InvoiceTemplate({ quote }: { quote: IQuote }) {
     return (
@@ -90,28 +90,21 @@ export default function InvoiceTemplate({ quote }: { quote: IQuote }) {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {quote.services?.map(
-                        (service: IQuoteServiceSelection, index: number) => (
-                            <TableRow
-                                key={index}
-                                className="bquote-b bquote-gray-100"
-                            >
-                                <TableCell className="font-medium">
-                                    #{index + 1}
-                                </TableCell>
-                                <TableCell>
-                                    <div>
-                                        <p className="font-medium">
-                                            {service.name}
-                                        </p>
-                                    </div>
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    {quote.details?.images}
-                                </TableCell>
-                            </TableRow>
-                        )
-                    )}
+                    <TableRow className="bquote-b bquote-gray-100">
+                        <TableCell className="font-medium">
+                            #1
+                        </TableCell>
+                        <TableCell>
+                            <div>
+                                <p className="font-medium">
+                                    {quote.title}
+                                </p>
+                            </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                            {quote.details?.images}
+                        </TableCell>
+                    </TableRow>
                 </TableBody>
             </Table>
 

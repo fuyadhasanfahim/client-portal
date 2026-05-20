@@ -9,27 +9,6 @@ export interface IQuoteUser {
     address?: string;
 }
 
-export interface IQuoteServiceComplexity {
-    _id: string;
-    name: string;
-}
-
-export interface IQuoteServiceType {
-    _id: string;
-    name: string;
-    complexity?: IQuoteServiceComplexity;
-}
-
-export interface IQuoteServiceSelection {
-    _id: string;
-    name: string;
-    colorCodes?: string[];
-    options?: string[];
-    types?: IQuoteServiceType[];
-    complexity?: IQuoteServiceComplexity;
-    disabledOptions?: string[];
-}
-
 export interface IQuoteDetails {
     deliveryDate?: Date;
     downloadLink?: string;
@@ -47,17 +26,17 @@ export interface IQuoteDetails {
 export interface IQuote extends Document {
     quoteID: string;
     user: IQuoteUser;
-    services: IQuoteServiceSelection[];
+    title: string;
     details?: IQuoteDetails;
     isRevision?: boolean;
     status:
         | "pending"
-        | "in-progress"
-        | "delivered"
-        | "in-revision"
+        | "in_progress"
+        | "in_review"
         | "completed"
-        | "canceled";
-    quoteStage: "draft" | "services-selected" | "details-provided";
+        | "delivered"
+        | "cancelled";
+    quoteStage: "draft" | "details-provided";
     createdAt: Date;
     updatedAt: Date;
 }

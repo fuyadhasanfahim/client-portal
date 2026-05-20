@@ -41,21 +41,7 @@ export default function OrderDetailsCard({
             <div className="col-span-2 space-y-6">
                 <OrderDetailsStatus status={order.status} role={user.role} />
                 <OrderDetailsSummary order={order} />
-                <OrderDetailsServiceList
-                    backgroundOption={order.details?.backgroundOption}
-                    height={order.details?.height}
-                    imageResizing={
-                        order.details?.imageResizing === true ? 'yes' : 'no'
-                    }
-                    images={order.details?.images}
-                    instructions={order.details?.instructions}
-                    backgroundColor={order.details?.backgroundColor}
-                    returnFileFormat={order.details?.returnFileFormat}
-                    services={order.services}
-                    width={order.details?.width}
-                    downloadLink={order.details?.downloadLink}
-                    deliveryLink={order.details?.deliveryLink}
-                />
+                <OrderDetailsServiceList order={order} />
                 <OrderDetailsRevisions revision={revision} />
             </div>
 

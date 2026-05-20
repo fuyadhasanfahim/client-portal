@@ -3,9 +3,6 @@ import {
     IOrderUser,
     IOrder,
     IOrderDetails,
-    IOrderServiceComplexity,
-    IOrderServiceSelection,
-    IOrderServiceType,
 } from '../types/order.interface';
 import { models } from 'mongoose';
 
@@ -21,39 +18,11 @@ const OrderUserSchema = new Schema<IOrderUser>(
     { timestamps: true }
 );
 
-const OrderServiceComplexitySchema = new Schema<IOrderServiceComplexity>(
-    {
-        name: { type: String, required: true },
-        price: { type: Number, required: true },
-    },
-    { timestamps: true }
-);
-
-const OrderServiceTypeSchema = new Schema<IOrderServiceType>(
-    {
-        name: { type: String, required: true },
-        price: { type: Number },
-        complexity: { type: OrderServiceComplexitySchema },
-    },
-    { timestamps: true }
-);
-
-const OrderServiceSelectionSchema = new Schema<IOrderServiceSelection>(
-    {
-        name: { type: String, required: true },
-        price: { type: Number },
-        colorCodes: [{ type: String }],
-        options: [{ type: String }],
-        types: [OrderServiceTypeSchema],
-        complexity: { type: OrderServiceComplexitySchema },
-    },
-    { timestamps: true }
-);
-
 const OrderDetailsSchema = new Schema<IOrderDetails>(
     {
         deliveryDate: { type: Date },
         downloadLink: { type: String },
+        deliveryLink: { type: String },
         images: { type: Number },
         returnFileFormat: [{ type: String }],
         backgroundOption: [{ type: String }],
@@ -70,17 +39,28 @@ export const OrderSchema = new Schema<IOrder>(
     {
         orderID: { type: String, required: true, unique: true },
         user: { type: OrderUserSchema, required: true },
-        services: { type: [OrderServiceSelectionSchema], required: true },
+        title: { type: String, required: true },
+        pricingType: { type: String, enum: ['per-image', 'total'], required: true },
+        price: { type: Number, required: true },
+        imagesCount: { type: Number, required: true },
         details: { type: OrderDetailsSchema },
+        total: {
+            type: Number,
+            required: true,
+        },
+        isRevision: {
+            type: Boolean,
+            default: false,
+        },
         status: {
             type: String,
             enum: [
                 'pending',
-                'in-progress',
-                'delivered',
-                'in-revision',
+                'in_progress',
+                'in_review',
                 'completed',
-                'canceled',
+                'delivered',
+                'cancelled',
             ],
             default: 'pending',
         },
@@ -89,10 +69,11 @@ export const OrderSchema = new Schema<IOrder>(
             type: String,
             enum: [
                 'pending',
-                'pay-later',
+                'succeeded',
                 'paid',
-                'payment-failed',
+                'failed',
                 'refunded',
+                'pay-later',
             ],
             default: 'pending',
         },
@@ -103,7 +84,6 @@ export const OrderSchema = new Schema<IOrder>(
             type: String,
             enum: [
                 'draft',
-                'services-selected',
                 'details-provided',
                 'payment-completed',
             ],
@@ -115,5 +95,5 @@ export const OrderSchema = new Schema<IOrder>(
     }
 );
 
-const OrderModel = models?.Order || model('Order', OrderSchema);
+const OrderModel = models?.Order || model<IOrder>('Order', OrderSchema);
 export default OrderModel;

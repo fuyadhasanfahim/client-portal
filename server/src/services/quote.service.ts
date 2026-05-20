@@ -8,13 +8,13 @@ import RevisionModel from "../models/revision.model.js";
 async function newQuoteInDB({
     quoteStage,
     userID,
-    services,
+    title,
     quoteID,
     details,
 }: {
-    quoteStage: string;
+    quoteStage: any;
     userID: string;
-    services?: IQuote["services"];
+    title?: string;
     quoteID?: string;
     details?: IQuote["details"];
 }) {
@@ -24,29 +24,29 @@ async function newQuoteInDB({
 
     let quote;
 
-    if (quoteStage === "services-selected" && services) {
+    if (!quoteID) {
         quote = await QuoteModel.create({
             quoteID: `WBQ${nanoid(10).toUpperCase()}`,
             user: {
                 userID,
                 name: user.name,
                 email: user.email,
-                image: user.image,
+                image: user.image ?? "",
                 company: user.company,
                 address: user.address,
             },
-            services,
+            title: title || "New Quote",
+            details: details || {},
             status: "pending",
-            quoteStage,
+            quoteStage: quoteStage || "details-provided",
         });
-    }
-
-    if (quoteStage === "details-provided" && quoteID && details) {
+    } else {
         quote = await QuoteModel.findOneAndUpdate(
             { quoteID },
             {
                 details,
                 quoteStage,
+                ...(title ? { title } : {}),
             },
             { new: true }
         );
@@ -165,7 +165,7 @@ async function reviewQuoteToAdmin({
 }) {
     const quote = await QuoteModel.findOneAndUpdate(
         { quoteID: quoteID },
-        { status: "in-revision", "details.instructions": instructions },
+        { status: "in_review", "details.instructions": instructions },
         { new: true }
     );
 
@@ -294,7 +294,7 @@ async function getQuotesByUserIDFromDB({
 
     const query: any = {
         "user.userID": userID,
-        quoteStage: "payment-completed",
+        quoteStage: "details-provided",
     };
 
     if (search) {

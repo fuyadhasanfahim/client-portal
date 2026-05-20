@@ -29,18 +29,6 @@ const userSchema = new Schema<IUser & Document>(
 
         isExistingUser: { type: Boolean, default: false },
         isTeamMember: { type: Boolean, default: false },
-        services: [
-            {
-                name: {
-                    type: String,
-                    required: true,
-                },
-                price: {
-                    type: Number,
-                    required: true,
-                },
-            },
-        ],
 
         ownerUserID: { type: String, index: true, default: null },
         teamPermissions: {

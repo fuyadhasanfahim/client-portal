@@ -22,7 +22,7 @@ export default function ClientStats({
             value:
                 !isLoading &&
                 orders.filter((order) =>
-                    ['in-progress', 'in-revision', 'delivered'].includes(
+                    ['in_progress', 'in_review', 'delivered'].includes(
                         order.status
                     )
                 ).length,
@@ -54,7 +54,7 @@ export default function ClientStats({
             title: 'Canceled Orders',
             value:
                 !isLoading &&
-                orders.filter((order) => ['canceled'].includes(order.status))
+                orders.filter((order) => ['cancelled'].includes(order.status))
                     .length,
             icon: IconPackageOff,
             color: 'from-red-500 to-red-600',

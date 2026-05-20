@@ -136,7 +136,7 @@ export default function RootInvoice() {
                             {[
                                 'Order ID',
                                 'Client',
-                                'Services',
+                                'Title',
                                 'Total ($)',
                                 'Payment ($)',
                                 'Order Status',
@@ -198,7 +198,7 @@ export default function RootInvoice() {
                                                     className={cn(
                                                         'text-primary underline',
                                                         order.status ===
-                                                            'canceled' &&
+                                                            'cancelled' &&
                                                             'text-destructive'
                                                     )}
                                                 >
@@ -209,39 +209,20 @@ export default function RootInvoice() {
                                                 className={cn(
                                                     'text-center text-sm border-r',
                                                     order.status ===
-                                                        'canceled' &&
+                                                        'cancelled' &&
                                                         'text-destructive'
                                                 )}
                                             >
                                                 {order.user.userID}
                                             </TableCell>
-                                            <TableCell
-                                                className={cn(
-                                                    'text-start text-sm border-r',
-                                                    order.status ===
-                                                        'canceled' &&
-                                                        'text-destructive'
-                                                )}
-                                            >
-                                                <ul className="list-decimal list-inside space-y-1">
-                                                    {order.services.map(
-                                                        (service) => (
-                                                            <li
-                                                                key={
-                                                                    service.name
-                                                                }
-                                                            >
-                                                                {service.name}
-                                                            </li>
-                                                        )
-                                                    )}
-                                                </ul>
+                                            <TableCell className="text-start text-sm border-r">
+                                                {order.title}
                                             </TableCell>
                                             <TableCell
                                                 className={cn(
                                                     'text-center text-sm border-r',
                                                     order.status ===
-                                                        'canceled' &&
+                                                        'cancelled' &&
                                                         'text-destructive'
                                                 )}
                                             >
@@ -251,7 +232,7 @@ export default function RootInvoice() {
                                                 className={cn(
                                                     'text-center capitalize text-sm border-r',
                                                     order.status ===
-                                                        'canceled' &&
+                                                        'cancelled' &&
                                                         'text-destructive'
                                                 )}
                                             >

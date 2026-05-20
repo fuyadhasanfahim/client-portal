@@ -107,7 +107,7 @@ export default function RootDashboard() {
             value:
                 !isLoading &&
                 data?.orders.filter((order: IOrder) =>
-                    ['in-progress', 'pending', 'in-revision'].includes(
+                    ['in_progress', 'pending', 'in_review'].includes(
                         order.status
                     )
                 ).length,
@@ -177,7 +177,7 @@ export default function RootDashboard() {
 
                 if (order.status === 'completed') {
                     monthlyData[monthKey].completedOrders += 1;
-                } else if (order.status === 'canceled') {
+                } else if (order.status === 'cancelled') {
                     monthlyData[monthKey].canceledOrders += 1;
                 }
                 monthlyData[monthKey].newOrders += 1;
@@ -228,7 +228,7 @@ export default function RootDashboard() {
 
                 if (order.status === 'completed') {
                     dailyData[dateKey].completedOrders += 1;
-                } else if (order.status === 'canceled') {
+                } else if (order.status === 'cancelled') {
                     dailyData[dateKey].canceledOrders += 1;
                 }
                 dailyData[dateKey].newOrders += 1;
@@ -452,7 +452,7 @@ export default function RootDashboard() {
                                                     className={cn(
                                                         'text-primary underline',
                                                         order.status ===
-                                                            'canceled' &&
+                                                            'cancelled' &&
                                                             'text-destructive'
                                                     )}
                                                 >
@@ -463,7 +463,7 @@ export default function RootDashboard() {
                                                 className={cn(
                                                     'text-center text-sm border-r',
                                                     order.status ===
-                                                        'canceled' &&
+                                                        'cancelled' &&
                                                         'text-destructive'
                                                 )}
                                             >
@@ -473,30 +473,18 @@ export default function RootDashboard() {
                                                 className={cn(
                                                     'text-start text-sm border-r',
                                                     order.status ===
-                                                        'canceled' &&
+                                                        'cancelled' &&
                                                         'text-destructive'
                                                 )}
                                             >
-                                                <ul className="list-decimal list-inside space-y-1">
-                                                    {order.services.map(
-                                                        (service) => (
-                                                            <li
-                                                                key={
-                                                                    service.name
-                                                                }
-                                                            >
-                                                                {service.name}
-                                                            </li>
-                                                        )
-                                                    )}
-                                                </ul>
+                                                {order.title}
                                             </TableCell>
                                             {canViewPrices && (
                                                 <TableCell
                                                     className={cn(
                                                         'text-center text-sm border-r',
                                                         order.status ===
-                                                            'canceled' &&
+                                                            'cancelled' &&
                                                             'text-destructive'
                                                     )}
                                                 >
@@ -507,7 +495,7 @@ export default function RootDashboard() {
                                                 className={cn(
                                                     'text-center text-sm border-r',
                                                     order.status ===
-                                                        'canceled' &&
+                                                        'cancelled' &&
                                                         'text-destructive'
                                                 )}
                                             >
@@ -522,7 +510,7 @@ export default function RootDashboard() {
                                                     'text-center text-sm border-r',
                                                     role === 'User' &&
                                                         order.status ===
-                                                            'canceled' &&
+                                                            'cancelled' &&
                                                         'text-destructive'
                                                 )}
                                             >

@@ -132,7 +132,7 @@ export default function OrderDataTable() {
                 ? [
                       'Order ID',
                       'Client',
-                      'Services',
+                      'Title',
                       'Total ($)',
                       'Payment ($)',
                       'Order Status',
@@ -141,7 +141,7 @@ export default function OrderDataTable() {
                 : [
                       'Order ID',
                       'Client',
-                      'Services',
+                      'Title',
                       'Payment ($)',
                       'Order Status',
                       'Actions',
@@ -209,7 +209,7 @@ export default function OrderDataTable() {
                                     'paid',
                                     'payment-failed',
                                     'refunded',
-                                    'canceled',
+                                    'cancelled',
                                 ].map((val) => (
                                     <SelectItem
                                         key={val}
@@ -313,7 +313,7 @@ export default function OrderDataTable() {
                                                     className={cn(
                                                         'text-primary underline',
                                                         order.status ===
-                                                            'canceled' &&
+                                                            'cancelled' &&
                                                             'text-destructive'
                                                     )}
                                                 >
@@ -324,40 +324,21 @@ export default function OrderDataTable() {
                                                 className={cn(
                                                     'text-center text-sm border-r',
                                                     order.status ===
-                                                        'canceled' &&
+                                                        'cancelled' &&
                                                         'text-destructive'
                                                 )}
                                             >
                                                 {order.user.userID}
                                             </TableCell>
-                                            <TableCell
-                                                className={cn(
-                                                    'text-start text-sm border-r',
-                                                    order.status ===
-                                                        'canceled' &&
-                                                        'text-destructive'
-                                                )}
-                                            >
-                                                <ul className="list-decimal list-inside space-y-1">
-                                                    {order.services.map(
-                                                        (service) => (
-                                                            <li
-                                                                key={
-                                                                    service.name
-                                                                }
-                                                            >
-                                                                {service.name}
-                                                            </li>
-                                                        )
-                                                    )}
-                                                </ul>
+                                            <TableCell className="text-start text-sm border-r">
+                                                {order.title}
                                             </TableCell>
                                             {canViewPrices && (
                                                 <TableCell
                                                     className={cn(
                                                         'text-center text-sm border-r',
                                                         order.status ===
-                                                            'canceled' &&
+                                                            'cancelled' &&
                                                             'text-destructive'
                                                     )}
                                                 >
@@ -370,7 +351,7 @@ export default function OrderDataTable() {
                                                 className={cn(
                                                     'text-center capitalize text-sm border-r',
                                                     order.status ===
-                                                        'canceled' &&
+                                                        'cancelled' &&
                                                         'text-destructive'
                                                 )}
                                             >

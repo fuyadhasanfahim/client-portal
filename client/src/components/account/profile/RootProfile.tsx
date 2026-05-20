@@ -20,8 +20,6 @@ import {
     Lock,
     Globe,
     Building,
-    Server,
-    HardDrive,
     Send,
 } from 'lucide-react';
 import {
@@ -53,77 +51,23 @@ import toast from 'react-hot-toast';
 import ApiError from '../../shared/ApiError';
 import EditInfoForm from '@/components/auth/EditInfoForm';
 import { cn } from '@/lib/utils';
-import { useGetServicesQuery } from '@/redux/features/services/servicesApi';
-import { IService } from '@/types/service.interface';
-import {
-    useAdditionalServiceMutation,
-    useCheckForAdditionalServiceQuery,
-} from '@/redux/features/client/clientApi';
 
 export default function ProfilePage() {
     const { user, isLoading } = useLoggedInUser();
     const { userID, email } = user || {};
 
-    const { data, isLoading: isServiceLoading } = useGetServicesQuery(userID!, {
-        skip: !userID,
-    });
-
-    const services = useMemo(() => {
-        if (isServiceLoading || isLoading) return [];
-
-        const userServices = user?.services || [];
-        if (userServices.length > 0) return userServices;
-
-        return data?.data?.services || [];
-    }, [user?.services, data?.data?.services, isServiceLoading, isLoading]);
-
     const [updatePassword, { isLoading: isUpdatingPassword }] =
         useUpdatePasswordMutation();
     const [updateAvatar, { isLoading: isUpdatingAvatar }] =
         useUpdateAvatarMutation();
-    const [additionalService, { isLoading: isRequesting }] =
-        useAdditionalServiceMutation();
-    const {
-        data: additionalServiceData,
-        isLoading: isAdditionalServiceLoading,
-    } = useCheckForAdditionalServiceQuery(email!, {
-        skip: !email,
-    });
 
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [serviceName, setServiceName] = useState('');
-    const [servicePrice, setServicePrice] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const handleRequestService = async (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
 
-        if (!serviceName || Number(servicePrice) <= 0) {
-            toast.error('Please provide valid service details');
-            return;
-        }
-
-        try {
-            const res = await additionalService({
-                clientEmail: email!,
-                serviceName,
-                servicePrice: Number(servicePrice),
-            }).unwrap();
-
-            if (res.success) {
-                toast.success('Service request sent successfully');
-                setServiceName('');
-                setServicePrice('');
-            } else {
-                toast.error(res.message || 'Failed to send service request');
-            }
-        } catch (error) {
-            ApiError(error);
-        }
-    };
 
     if (isLoading || !user) {
         return (
@@ -377,7 +321,7 @@ export default function ProfilePage() {
                 </CardContent>
             </Card>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
                 <Card className="border-primary/20 hover:border-primary/40 transition-colors duration-300">
                     <CardHeader className="pb-3">
                         <div className="flex items-center justify-between">
@@ -580,142 +524,6 @@ export default function ProfilePage() {
                     </Card>
                 )}
 
-                {user?.role !== 'admin' && user?.isTeamMember === false && (
-                    <Card className="border-primary/20 hover:border-primary/40 transition-colors duration-300">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Server className="w-5 h-5 text-primary" />
-                                Services
-                            </CardTitle>
-                            <CardDescription>
-                                The list of services you have access to
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                            <ul className="space-y-4 list-inside list-decimal">
-                                {services.map((service: IService) => (
-                                    <li key={service._id} className="ml-2">
-                                        {service.name}
-                                    </li>
-                                ))}
-                                <Dialog>
-                                    <DialogTrigger asChild>
-                                        <Button variant="secondary" size="sm">
-                                            <HardDrive />
-                                            Request for additional Service
-                                        </Button>
-                                    </DialogTrigger>
-                                    {!isAdditionalServiceLoading &&
-                                    additionalServiceData &&
-                                    additionalServiceData?.data ? (
-                                        <DialogContent>
-                                            <DialogHeader>
-                                                <DialogTitle className="text-2xl">
-                                                    You have already requested a
-                                                    service
-                                                </DialogTitle>
-                                                <DialogDescription>
-                                                    Our team is reviewing your
-                                                    request for additional
-                                                    services. We will notify you
-                                                    once it is approved.
-                                                </DialogDescription>
-                                            </DialogHeader>
-                                        </DialogContent>
-                                    ) : (
-                                        <DialogContent>
-                                            <DialogHeader>
-                                                <DialogTitle className="text-2xl">
-                                                    Request Additional Service
-                                                </DialogTitle>
-                                                <DialogDescription>
-                                                    Please fill out the form
-                                                    below. Our team will review
-                                                    your request and get back to
-                                                    you shortly.
-                                                </DialogDescription>
-                                            </DialogHeader>
-                                            <form
-                                                onSubmit={handleRequestService}
-                                                className="space-y-4"
-                                            >
-                                                <div className="grid gap-4 grid-cols-2">
-                                                    {/* Service Name */}
-                                                    <div className="grid gap-3">
-                                                        <Label htmlFor="service-name">
-                                                            Service Name
-                                                        </Label>
-                                                        <Input
-                                                            id="service-name"
-                                                            name="service-name"
-                                                            type="text"
-                                                            placeholder="Enter the service name"
-                                                            value={serviceName}
-                                                            onChange={(e) =>
-                                                                setServiceName(
-                                                                    e.target
-                                                                        .value
-                                                                )
-                                                            }
-                                                            required
-                                                        />
-                                                    </div>
-
-                                                    {/* Service Price */}
-                                                    <div className="grid gap-3">
-                                                        <Label htmlFor="service-price">
-                                                            Service Price
-                                                        </Label>
-                                                        <Input
-                                                            id="service-price"
-                                                            name="service-price"
-                                                            type="number"
-                                                            value={servicePrice}
-                                                            onChange={(e) =>
-                                                                setServicePrice(
-                                                                    e.target
-                                                                        .value
-                                                                )
-                                                            }
-                                                            min={0}
-                                                            step={0.01}
-                                                            required
-                                                            placeholder="Enter the service price"
-                                                        />
-                                                    </div>
-
-                                                    {/* Submit Button */}
-                                                    <div className="col-span-2 mt-3">
-                                                        <Button
-                                                            type="submit"
-                                                            className="w-full"
-                                                            disabled={
-                                                                !serviceName ||
-                                                                Number(
-                                                                    servicePrice
-                                                                ) <= 0 ||
-                                                                isRequesting
-                                                            }
-                                                        >
-                                                            {isRequesting ? (
-                                                                <Loader2 className="animate-spin" />
-                                                            ) : (
-                                                                <>
-                                                                    <Send />
-                                                                    Send Request
-                                                                </>
-                                                            )}
-                                                        </Button>
-                                                    </div>
-                                                </div>
-                                            </form>
-                                        </DialogContent>
-                                    )}
-                                </Dialog>
-                            </ul>
-                        </CardContent>
-                    </Card>
-                )}
             </div>
         </section>
     );

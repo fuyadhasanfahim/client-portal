@@ -1,36 +1,10 @@
-import { Document } from 'mongoose';
-
 export interface IOrderUser {
     userID: string;
     name: string;
     email: string;
-    image: string;
+    image?: string;
     company?: string;
     address?: string;
-}
-
-export interface IOrderServiceComplexity {
-    _id: string;
-    name: string;
-    price: number;
-}
-
-export interface IOrderServiceType {
-    _id: string;
-    name: string;
-    price?: number;
-    complexity?: IOrderServiceComplexity;
-}
-
-export interface IOrderServiceSelection {
-    _id: string;
-    name: string;
-    price?: number;
-    colorCodes?: string[];
-    options?: string[];
-    types?: IOrderServiceType[];
-    complexity?: IOrderServiceComplexity;
-    disabledOptions?: string[];
 }
 
 export interface IOrderDetails {
@@ -47,33 +21,37 @@ export interface IOrderDetails {
     instructions?: string;
 }
 
-export interface IOrder extends Document {
+export interface IOrder {
+    _id?: string;
     orderID: string;
     user: IOrderUser;
-    services: IOrderServiceSelection[];
+    title: string;
+    pricingType: 'per-image' | 'total';
+    price: number;
+    imagesCount: number;
     details?: IOrderDetails;
+    total: number;
     isRevision?: boolean;
     status:
         | 'pending'
-        | 'in-progress'
-        | 'delivered'
-        | 'in-revision'
+        | 'in_progress'
+        | 'in_review'
         | 'completed'
-        | 'canceled';
+        | 'delivered'
+        | 'cancelled';
     paymentID?: string;
     paymentStatus:
         | 'pending'
-        | 'pay-later'
+        | 'succeeded'
         | 'paid'
-        | 'payment-failed'
-        | 'refunded';
+        | 'failed'
+        | 'refunded'
+        | 'pay-later';
     refundID?: string;
     orderStage:
         | 'draft'
-        | 'services-selected'
         | 'details-provided'
         | 'payment-completed';
-    total?: number;
     createdAt: Date;
     updatedAt: Date;
 }

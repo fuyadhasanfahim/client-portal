@@ -91,9 +91,9 @@ export default function OrderDetailsPaymentAndDetails({
             </CardHeader>
 
             <CardContent className="space-y-3 text-sm">
-                {/* ✅ ADMIN: Show "Deliver Now" button when status is in-progress or in-revision */}
+                {/* ✅ ADMIN: Show "Deliver Now" button when status is in_progress or in_review */}
                 {role === 'admin' &&
-                    (status === 'in-progress' || status === 'in-revision') && (
+                    (status === 'in_progress' || status === 'in_review') && (
                         <DeliveryLinkUploader
                             quoteID={quoteID}
                             userID={userID}
@@ -127,7 +127,7 @@ export default function OrderDetailsPaymentAndDetails({
                                     Quote Feedback
                                 </DialogTitle>
                                 <DialogDescription>
-                                    {reviewOrComplete === 'in-revision'
+                                    {reviewOrComplete === 'in_review'
                                         ? 'Provide details for revision'
                                         : 'Confirm Quote completion'}
                                 </DialogDescription>
@@ -141,12 +141,12 @@ export default function OrderDetailsPaymentAndDetails({
                                 >
                                     <div>
                                         <RadioGroupItem
-                                            value="in-revision"
-                                            id="in-revision"
+                                            value="in_review"
+                                            id="in_review"
                                             className="peer sr-only"
                                         />
                                         <Label
-                                            htmlFor="in-revision"
+                                            htmlFor="in_review"
                                             className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-yellow-500"
                                         >
                                             <RefreshCw className="mb-2 h-6 w-6 text-yellow-500" />
@@ -169,7 +169,7 @@ export default function OrderDetailsPaymentAndDetails({
                                     </div>
                                 </RadioGroup>
 
-                                {reviewOrComplete === 'in-revision' && (
+                                {reviewOrComplete === 'in_review' && (
                                     <div className="space-y-2">
                                         <Label htmlFor="instruction">
                                             Revision Instructions
@@ -189,7 +189,7 @@ export default function OrderDetailsPaymentAndDetails({
 
                             <DialogFooter>
                                 <DialogClose asChild>
-                                    {reviewOrComplete === 'in-revision' ? (
+                                    {reviewOrComplete === 'in_review' ? (
                                         <Button
                                             type="submit"
                                             className="bg-yellow-500 hover:bg-yellow-600"

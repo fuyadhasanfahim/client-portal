@@ -114,7 +114,7 @@ export default function SelectOrderStatus({
                                 onClick={() =>
                                     handleOrderStatusChange({
                                         orderID,
-                                        status: 'canceled',
+                                        status: 'cancelled',
                                     })
                                 }
                             >
@@ -133,7 +133,7 @@ export default function SelectOrderStatus({
                                 onClick={() =>
                                     handleOrderStatusChange({
                                         orderID,
-                                        status: 'in-progress',
+                                        status: 'in_progress',
                                     })
                                 }
                             >

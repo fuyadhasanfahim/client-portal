@@ -9,7 +9,7 @@ import { buildSimpleQuoteStatusEmail } from "../lib/emailTemplate.js";
 async function newQuote(req: Request, res: Response) {
     try {
         const { quoteStage } = req.params as any;
-        const { userID, services, quoteID, details } = req.body;
+        const { userID, title, quoteID, details } = req.body;
 
         if (!quoteStage || !userID) {
             res.status(400).json({
@@ -22,7 +22,7 @@ async function newQuote(req: Request, res: Response) {
         const quote = await QuoteServices.newQuoteInDB({
             quoteStage,
             userID,
-            services,
+            title,
             quoteID,
             details,
         });
@@ -166,7 +166,7 @@ async function updateQuote(req: Request, res: Response) {
             return;
         }
 
-        if (data === "in-progress") {
+        if (data === "in-progress" || data === "in_progress" || data?.status === "in-progress" || data?.status === "in_progress") {
             await sendNotification({
                 userID: updatedQuote.user.userID,
                 title: `🎁 Quote #${quoteID} Accepted`,
@@ -175,12 +175,14 @@ async function updateQuote(req: Request, res: Response) {
             });
         }
 
-        await sendNotification({
-            userID: updatedQuote.user.userID,
-            title: `Quote #${quoteID} Canceled`,
-            message: `Hi ${updatedQuote.user.name}, your quote has been Canceled. Click to view the details.`,
-            link: `${envConfig.frontend_url}/quotes/details/${quoteID}`,
-        });
+        if (data === "cancelled" || data === "canceled" || data?.status === "cancelled" || data?.status === "canceled") {
+            await sendNotification({
+                userID: updatedQuote.user.userID,
+                title: `Quote #${quoteID} Canceled`,
+                message: `Hi ${updatedQuote.user.name}, your quote has been Canceled. Click to view the details.`,
+                link: `${envConfig.frontend_url}/quotes/details/${quoteID}`,
+            });
+        }
 
         io.to(quoteID).emit("quote-updated");
 

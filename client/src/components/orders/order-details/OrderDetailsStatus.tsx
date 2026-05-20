@@ -12,17 +12,17 @@ export default function OrderDetailsStatus({
 
     const getStatusCard = () => {
         switch (status) {
-            case 'in-revision':
+            case 'in_review':
                 return {
                     color: 'yellow',
                     title: isCustomer
-                        ? 'Your order is under revision'
-                        : 'Order marked as "In Revision"',
+                        ? 'Your order is under review'
+                        : 'Order marked as "In Review"',
                     message: isCustomer
-                        ? 'Our team is working on the requested changes.'
-                        : `You marked the order for revision. Awaiting updated submission.`,
+                        ? 'Our team is working on the requested changes or reviewing it.'
+                        : `You marked the order for review. Awaiting updated submission.`,
                 };
-            case 'in-progress':
+            case 'in_progress':
                 return {
                     color: 'blue',
                     title: isCustomer

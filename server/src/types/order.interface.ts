@@ -9,29 +9,6 @@ export interface IOrderUser {
     address?: string;
 }
 
-export interface IOrderServiceComplexity {
-    _id: string;
-    name: string;
-    price: number;
-}
-
-export interface IOrderServiceType {
-    _id: string;
-    name: string;
-    price?: number;
-    complexity?: IOrderServiceComplexity;
-}
-
-export interface IOrderServiceSelection {
-    _id: string;
-    name: string;
-    price?: number;
-    colorCodes?: string[];
-    options?: string[];
-    types?: IOrderServiceType[];
-    complexity?: IOrderServiceComplexity;
-}
-
 export interface IOrderDetails {
     deliveryDate?: Date;
     downloadLink?: string;
@@ -49,23 +26,25 @@ export interface IOrderDetails {
 export interface IOrder extends Document {
     orderID: string;
     user: IOrderUser;
-    services: IOrderServiceSelection[];
+    title: string;
+    pricingType: "per-image" | "total";
+    price: number;
+    imagesCount: number;
     details?: IOrderDetails;
-    total?: number;
+    total: number;
     isRevision?: boolean;
     status:
         | "pending"
-        | "in-progress"
-        | "delivered"
-        | "in-revision"
+        | "in_progress"
+        | "in_review"
         | "completed"
-        | "canceled";
+        | "delivered"
+        | "cancelled";
     paymentID?: string;
-    paymentStatus: "pending" | "succeeded" | "paid" | "failed" | "refunded";
+    paymentStatus: "pending" | "succeeded" | "paid" | "failed" | "refunded" | "pay-later";
     refundID?: string;
     orderStage:
         | "draft"
-        | "services-selected"
         | "details-provided"
         | "payment-completed";
     createdAt: Date;

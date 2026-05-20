@@ -7,7 +7,10 @@ export const ordersApi = apiSlice.injectEndpoints({
                 query: ({
                     orderStage,
                     userID,
-                    services,
+                    title,
+                    pricingType,
+                    price,
+                    imagesCount,
                     orderID,
                     details,
                     total,
@@ -18,7 +21,10 @@ export const ordersApi = apiSlice.injectEndpoints({
                     method: 'POST',
                     body: {
                         userID,
-                        services,
+                        title,
+                        pricingType,
+                        price,
+                        imagesCount,
                         orderID,
                         details,
                         total,

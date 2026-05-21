@@ -1,0 +1,8 @@
+allowBuilds:
+  core-js: true
+  esbuild: true
+  sharp: true
+minimumReleaseAgeExclude:
+  - '@aws-sdk/client-s3@3.1050.0'
+  - '@aws-sdk/s3-request-presigner@3.1050.0'
+  - '@types/node@25.9.1'

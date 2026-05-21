@@ -43,6 +43,11 @@ export async function POST(req: NextRequest) {
         user.oldPasswords = Array.from(
             new Set([...user.oldPasswords, hashedPassword])
         ).slice(-5);
+
+        if (user.provider === 'google') {
+            user.provider = 'both';
+        }
+
         await user.save();
 
         return NextResponse.json(

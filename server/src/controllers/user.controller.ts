@@ -105,12 +105,13 @@ async function updateUserPassword(req: Request, res: Response) {
         const userID = req.params.userID as string;
         const { newPassword, currentPassword } = req.body;
 
-        if (!userID || !currentPassword || !newPassword) {
+        if (!userID || !newPassword) {
             res.status(400).json({
                 success: false,
                 message:
-                    "Invalid input. Please provide userID and password to update.",
+                    "Invalid input. Please provide userID and newPassword to update.",
             });
+            return;
         }
 
         const updatedUser = await UserServices.updateUserPasswordInDB({
@@ -132,13 +133,30 @@ async function updateUserPassword(req: Request, res: Response) {
             message: "Password updated successfully.",
         });
     } catch (error) {
-        res.status(500).json({
+        const errorMessage =
+            error instanceof Error
+                ? error.message
+                : "Something went wrong! Please try again later.";
+
+        let statusCode = 500;
+        let message = "An error occurred while processing your request";
+
+        if (errorMessage === "User not found.") {
+            statusCode = 404;
+            message = errorMessage;
+        } else if (
+            errorMessage === "Current password is required." ||
+            errorMessage === "The current password you entered is incorrect." ||
+            errorMessage === "New password must be different from previous passwords."
+        ) {
+            statusCode = 400;
+            message = errorMessage;
+        }
+
+        res.status(statusCode).json({
             success: false,
-            message: "An error occurred while processing your request",
-            error:
-                error instanceof Error
-                    ? error.message
-                    : "Something went wrong! Please try again later.",
+            message,
+            error: errorMessage,
         });
     }
 }

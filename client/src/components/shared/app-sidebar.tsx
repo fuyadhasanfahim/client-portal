@@ -15,7 +15,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
-
     return (
         <Sidebar collapsible="offcanvas" {...props}>
             <SidebarHeader>
@@ -27,14 +26,13 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                         >
                             <SidebarMenuButton
                                 asChild
-                                className="w-[300px] h-[80px] mx-auto"
+                                className="h-auto mx-auto"
                             >
                                 <Image
-                                    src="https://res.cloudinary.com/dny7zfbg9/image/upload/v1755925557/uigjdstdcvlsngrtxbrl.png"
+                                    src="https://res.cloudinary.com/dny7zfbg9/image/upload/v1777996436/q83auvamwih8u8ftw5zu.png"
                                     alt="Web Briks Logo"
                                     width={200}
                                     height={60}
-                                    className="h-12 w-auto"
                                     priority
                                 />
                             </SidebarMenuButton>

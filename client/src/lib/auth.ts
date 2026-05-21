@@ -58,9 +58,11 @@ export const authOptions: NextAuthOptions = {
                         throw new Error(
                             'Invalid credentials! Please enter a valid email or password.',
                         );
-                    } else if (user.provider !== 'credentials') {
+                    }
+
+                    if (!user.password) {
                         throw new Error(
-                            'Invalid credentials! Please use Google to sign in.',
+                            'This account was created using Google. Please sign in with Google, or set a password in your Profile Settings or via "Forgot Password" to enable password login.',
                         );
                     }
 
@@ -145,11 +147,26 @@ export const authOptions: NextAuthOptions = {
                     email: user?.email,
                 });
 
-                if (existingUser?.provider === 'credentials') {
-                    throw new Error(
-                        'Invalid credentials! Please use credentials to sign in.',
-                    );
-                } else if (!existingUser) {
+                if (existingUser) {
+                    let isUpdated = false;
+
+                    if (!existingUser.googleId) {
+                        existingUser.googleId = user?.id?.toString();
+                        isUpdated = true;
+                    }
+
+                    if (existingUser.provider === 'credentials') {
+                        existingUser.provider = 'both';
+                        isUpdated = true;
+                    }
+
+                    if (isUpdated) {
+                        await existingUser.save();
+                    }
+
+                    user.id = existingUser.userID;
+                    return true;
+                } else {
                     const newUser = await UserModel.create({
                         userID: `WBU${nanoid(10).toUpperCase()}`,
                         name: user?.name,
@@ -167,10 +184,6 @@ export const authOptions: NextAuthOptions = {
 
                     return true;
                 }
-
-                user.id = existingUser.userID;
-
-                return true;
             }
 
             // Credentials sign-in success

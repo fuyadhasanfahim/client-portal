@@ -21,15 +21,7 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        if (user.provider === 'google') {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: 'Please login with Google',
-                },
-                { status: 400 }
-            );
-        }
+
 
         const token = generateToken();
         user.forgetPasswordToken = token;

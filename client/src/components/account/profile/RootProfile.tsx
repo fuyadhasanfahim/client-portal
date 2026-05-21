@@ -61,6 +61,8 @@ export default function ProfilePage() {
     const [updateAvatar, { isLoading: isUpdatingAvatar }] =
         useUpdateAvatarMutation();
 
+    const isGoogleOnly = useMemo(() => user?.provider === 'google', [user]);
+
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
@@ -162,12 +164,16 @@ export default function ProfilePage() {
         try {
             const res = await updatePassword({
                 userID: user.userID!,
-                currentPassword,
+                ...(isGoogleOnly ? {} : { currentPassword }),
                 newPassword,
             }).unwrap();
 
             if (res.success) {
-                toast.success('Password updated successfully');
+                toast.success(
+                    isGoogleOnly
+                        ? 'Password set successfully! You can now sign in with Google or Email/Password.'
+                        : 'Password updated successfully'
+                );
                 setCurrentPassword('');
                 setNewPassword('');
                 setConfirmPassword('');
@@ -406,24 +412,26 @@ export default function ProfilePage() {
                 </Card>
 
                 {/* Security Card */}
-                {user.provider !== 'google' && (
-                    <Card className="border-primary/20 hover:border-primary/40 transition-colors duration-300">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Lock className="w-5 h-5 text-primary" />
-                                Security Settings
-                            </CardTitle>
-                            <CardDescription>
-                                Manage your password and account security
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                            <div className="space-y-4">
-                                <Label className="flex items-center gap-2">
-                                    <Key className="w-4 h-4" />
-                                    Change Password
-                                </Label>
-                                <div className="grid grid-cols-1 gap-4">
+                <Card className="border-primary/20 hover:border-primary/40 transition-colors duration-300">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Lock className="w-5 h-5 text-primary" />
+                            {isGoogleOnly ? 'Set Account Password' : 'Security Settings'}
+                        </CardTitle>
+                        <CardDescription>
+                            {isGoogleOnly
+                                ? 'Set a password to enable password-based sign-in alongside Google'
+                                : 'Manage your password and account security'}
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <div className="space-y-4">
+                            <Label className="flex items-center gap-2">
+                                <Key className="w-4 h-4" />
+                                {isGoogleOnly ? 'Create Password' : 'Change Password'}
+                            </Label>
+                            <div className="grid grid-cols-1 gap-4">
+                                {!isGoogleOnly && (
                                     <div className="space-y-2">
                                         <Label
                                             htmlFor="current-password"
@@ -445,84 +453,86 @@ export default function ProfilePage() {
                                             disabled={isUpdatingPassword}
                                         />
                                     </div>
-                                    <div className="space-y-2">
-                                        <Label
-                                            htmlFor="new-password"
-                                            className="text-xs"
-                                        >
-                                            New Password
-                                        </Label>
-                                        <Input
-                                            id="new-password"
-                                            type="password"
-                                            placeholder="••••••••"
-                                            className="h-9 border-primary/30 focus:border-primary/50"
-                                            value={newPassword}
-                                            onChange={(e) =>
-                                                setNewPassword(e.target.value)
-                                            }
-                                            disabled={isUpdatingPassword}
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label
-                                            htmlFor="confirm-password"
-                                            className="text-xs"
-                                        >
-                                            Confirm Password
-                                        </Label>
-                                        <Input
-                                            id="confirm-password"
-                                            type="password"
-                                            placeholder="••••••••"
-                                            className="h-9 border-primary/30 focus:border-primary/50"
-                                            value={confirmPassword}
-                                            onChange={(e) =>
-                                                setConfirmPassword(
-                                                    e.target.value
-                                                )
-                                            }
-                                            disabled={isUpdatingPassword}
-                                        />
-                                    </div>
+                                )}
+                                <div className="space-y-2">
+                                    <Label
+                                        htmlFor="new-password"
+                                        className="text-xs"
+                                    >
+                                        {isGoogleOnly ? 'Password' : 'New Password'}
+                                    </Label>
+                                    <Input
+                                        id="new-password"
+                                        type="password"
+                                        placeholder="••••••••"
+                                        className="h-9 border-primary/30 focus:border-primary/50"
+                                        value={newPassword}
+                                        onChange={(e) =>
+                                            setNewPassword(e.target.value)
+                                        }
+                                        disabled={isUpdatingPassword}
+                                    />
                                 </div>
-                                {newPassword &&
-                                    confirmPassword &&
-                                    newPassword !== confirmPassword && (
-                                        <p className="text-sm text-destructive">
-                                            Passwords don&apos;t match
-                                        </p>
-                                    )}
-                                {newPassword && newPassword.length < 8 && (
+                                <div className="space-y-2">
+                                    <Label
+                                        htmlFor="confirm-password"
+                                        className="text-xs"
+                                    >
+                                        Confirm Password
+                                    </Label>
+                                    <Input
+                                        id="confirm-password"
+                                        type="password"
+                                        placeholder="••••••••"
+                                        className="h-9 border-primary/30 focus:border-primary/50"
+                                        value={confirmPassword}
+                                        onChange={(e) =>
+                                            setConfirmPassword(
+                                                e.target.value
+                                            )
+                                        }
+                                        disabled={isUpdatingPassword}
+                                    />
+                                </div>
+                            </div>
+                            {newPassword &&
+                                confirmPassword &&
+                                newPassword !== confirmPassword && (
                                     <p className="text-sm text-destructive">
-                                        Password must be at least 8 characters
+                                        Passwords don&apos;t match
                                     </p>
                                 )}
-                            </div>
-                        </CardContent>
-                        <CardFooter>
-                            <Button
-                                className="ml-auto shadow-sm hover:shadow-md transition-shadow"
-                                onClick={handleChangePassword}
-                                disabled={
-                                    isUpdatingPassword ||
-                                    !currentPassword ||
-                                    !newPassword ||
-                                    !confirmPassword ||
-                                    newPassword !== confirmPassword ||
-                                    newPassword.length < 8
-                                }
-                            >
-                                {isUpdatingPassword ? (
-                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                ) : null}
-                                {isUpdatingPassword
-                                    ? 'Updating...'
-                                    : 'Save Security Settings'}
-                            </Button>
-                        </CardFooter>
-                    </Card>
-                )}
+                            {newPassword && newPassword.length < 8 && (
+                                <p className="text-sm text-destructive">
+                                    Password must be at least 8 characters
+                                </p>
+                            )}
+                        </div>
+                    </CardContent>
+                    <CardFooter>
+                        <Button
+                            className="ml-auto shadow-sm hover:shadow-md transition-shadow"
+                            onClick={handleChangePassword}
+                            disabled={
+                                isUpdatingPassword ||
+                                (!isGoogleOnly && !currentPassword) ||
+                                !newPassword ||
+                                !confirmPassword ||
+                                newPassword !== confirmPassword ||
+                                newPassword.length < 8
+                            }
+                        >
+                            {isUpdatingPassword ? (
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            ) : null}
+                            {isUpdatingPassword
+                                ? 'Updating...'
+                                : isGoogleOnly
+                                ? 'Set Password'
+                                : 'Save Security Settings'}
+                        </Button>
+                    </CardFooter>
+                </Card>
 
             </div>
         </section>

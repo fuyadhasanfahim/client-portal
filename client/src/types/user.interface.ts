@@ -1,5 +1,5 @@
 export type UserRole = 'user' | 'admin';
-export type AuthProvider = 'credentials' | 'google';
+export type AuthProvider = 'credentials' | 'google' | 'both';
 
 export type ITeamPermissions = {
     viewPrices?: boolean;

@@ -64,7 +64,7 @@ export async function updateUserPasswordInDB({
     newPassword,
 }: {
     userID: string;
-    currentPassword: string;
+    currentPassword?: string;
     newPassword: string;
 }) {
     try {
@@ -74,30 +74,42 @@ export async function updateUserPasswordInDB({
             throw new Error("User not found.");
         }
 
-        const isPasswordValid = await bcrypt.compare(
-            currentPassword,
-            user.password
-        );
+        const hasExistingPassword = !!user.password;
 
-        if (!isPasswordValid) {
-            throw new Error("The current password you entered is incorrect.");
-        }
-
-        const allOldPasswords = [user.password, ...(user.oldPasswords || [])];
-
-        for (const oldHashed of allOldPasswords) {
-            const isSame = await bcrypt.compare(newPassword, oldHashed);
-            if (isSame) {
-                throw new Error(
-                    "New password must be different from previous passwords."
-                );
+        if (hasExistingPassword) {
+            if (!currentPassword) {
+                throw new Error("Current password is required.");
             }
+
+            const isPasswordValid = await bcrypt.compare(
+                currentPassword,
+                user.password
+            );
+
+            if (!isPasswordValid) {
+                throw new Error("The current password you entered is incorrect.");
+            }
+
+            const allOldPasswords = [user.password, ...(user.oldPasswords || [])];
+
+            for (const oldHashed of allOldPasswords) {
+                const isSame = await bcrypt.compare(newPassword, oldHashed);
+                if (isSame) {
+                    throw new Error(
+                        "New password must be different from previous passwords."
+                    );
+                }
+            }
+
+            user.oldPasswords = [...(user.oldPasswords || []), user.password];
         }
 
         const hashedNewPassword = await bcrypt.hash(newPassword, 12);
-
-        user.oldPasswords = [...(user.oldPasswords || []), user.password];
         user.password = hashedNewPassword;
+
+        if (user.provider === "google") {
+            user.provider = "both";
+        }
 
         await user.save();
 

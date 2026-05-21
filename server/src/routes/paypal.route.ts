@@ -7,6 +7,7 @@ import { PaymentModel } from "../models/payment.model.js";
 import { PendingOrderModel } from "../models/pendingOrder.model.js";
 import UserModel from "../models/user.model.js";
 import { sendEmail } from "../lib/nodemailer.js";
+import { PaymentLedgerModel } from "../models/paymentLedger.model.js";
 
 const router = Router();
 
@@ -75,14 +76,42 @@ router.post("/create-order", async (req, res) => {
             return;
         }
 
-        const pendingOrder = await PendingOrderModel.findOne({ pendingOrderID });
+        const isPending = pendingOrderID.startsWith("PO");
+        const pendingOrder = isPending
+            ? await PendingOrderModel.findOne({ pendingOrderID })
+            : await OrderModel.findOne({ orderID: pendingOrderID });
+
         if (!pendingOrder) {
-            res.status(404).json({ error: "Pending Order not found" });
+            res.status(404).json({ error: isPending ? "Pending Order not found" : "Order not found" });
+            return;
+        }
+
+        // --- MATH PRICE/COUNT GUARD CHECK ---
+        const pricingType = pendingOrder.pricingType || "";
+        const price = pendingOrder.price || 0;
+        const imagesCount = pendingOrder.imagesCount || 0;
+        const totalAmount = pendingOrder.total || 0;
+
+        let calculatedTotal = 0;
+        if (pricingType === "per-image") {
+            calculatedTotal = price * imagesCount;
+        } else {
+            // flat-rate pricing
+            calculatedTotal = price;
+        }
+
+        if (Math.abs(calculatedTotal - totalAmount) > 0.01) {
+            res.status(400).json({
+                error: `Billing Guard Violation: Math mismatch. Expected total of ${calculatedTotal} (${pricingType} pricing with unit price ${price} and count ${imagesCount}) but database record shows ${totalAmount}.`
+            });
             return;
         }
 
         const accessToken = await getAccessToken();
-        const { items, total } = calculateOrderTotal(pendingOrder);
+        const pendingOrderAny = pendingOrder as any;
+        const { items, total } = calculateOrderTotal(pendingOrderAny);
+
+        const orderRefID = (pendingOrderAny.pendingOrderID || pendingOrderAny.orderID || pendingOrderID).toString();
 
         const response = await axios.post(
             `${paypal_api_base_url}/v2/checkout/orders`,
@@ -90,8 +119,8 @@ router.post("/create-order", async (req, res) => {
                 intent: "CAPTURE",
                 purchase_units: [
                     {
-                        reference_id: pendingOrder.pendingOrderID.toString(),
-                        description: `Order ${pendingOrder.pendingOrderID} payment`,
+                        reference_id: orderRefID,
+                        description: `Order ${orderRefID} payment`,
                         amount: {
                             currency_code: "USD",
                             value: total.toFixed(2),
@@ -120,6 +149,23 @@ router.post("/create-order", async (req, res) => {
             status: "pending",
             amount: total,
             currency: "USD",
+        });
+
+        // Record Initialized state in Audit Ledger
+        const ledgerID = `LGR-${nanoid(10).toUpperCase()}`;
+        await PaymentLedgerModel.create({
+            ledgerID,
+            userID: pendingOrder.user.userID,
+            orderID: pendingOrderID,
+            paymentID: response.data.id,
+            action: "INITIALIZED",
+            amount: total,
+            currency: "USD",
+            metadata: {
+                paypalOrderID: response.data.id,
+                paymentOption: "paypal",
+                paymentMethod: "paypal",
+            },
         });
 
         res.json({
@@ -160,37 +206,56 @@ router.post("/:paymentID/capture", async (req, res) => {
         }
 
         const pendingOrderID = payment.orderID; // stored pendingOrderID in orderID field
-        const pendingOrder = await PendingOrderModel.findOne({ pendingOrderID });
+        const isPending = pendingOrderID.startsWith("PO");
+        const pendingOrder = isPending
+            ? await PendingOrderModel.findOne({ pendingOrderID })
+            : await OrderModel.findOne({ orderID: pendingOrderID });
+
         if (!pendingOrder) {
-            res.status(404).json({ error: "Pending order not found or already completed." });
+            res.status(404).json({ error: isPending ? "Pending order not found or already completed." : "Order not found." });
             return;
         }
 
-        let newOrderID = "";
+        let newOrderID = pendingOrderID;
         let paymentStatus = "pending";
         let orderStage = "payment-completed";
 
         if (response.data.status === "COMPLETED") {
-            newOrderID = `WBO${nanoid(10).toUpperCase()}`;
             paymentStatus = "paid";
 
-            // 1. Create the actual Order
-            const newOrder = await OrderModel.create({
-                orderID: newOrderID,
-                user: pendingOrder.user,
-                title: pendingOrder.title,
-                pricingType: pendingOrder.pricingType,
-                price: pendingOrder.price,
-                imagesCount: pendingOrder.imagesCount,
-                details: pendingOrder.details,
-                total: pendingOrder.total,
-                orderStage: "payment-completed",
-                status: "in_progress",
-                paymentStatus: "paid",
-                paymentID: paymentID,
-            });
+            if (isPending) {
+                newOrderID = `WBO${nanoid(10).toUpperCase()}`;
+                // 1. Create the actual Order
+                await OrderModel.create({
+                    orderID: newOrderID,
+                    user: pendingOrder.user,
+                    title: pendingOrder.title,
+                    pricingType: pendingOrder.pricingType,
+                    price: pendingOrder.price,
+                    imagesCount: pendingOrder.imagesCount,
+                    details: pendingOrder.details,
+                    total: pendingOrder.total,
+                    orderStage: "payment-completed",
+                    status: "in_progress",
+                    paymentStatus: "paid",
+                    paymentID: paymentID,
+                });
+                
+                // 2. Remove pending order after successful creation
+                await PendingOrderModel.deleteOne({ pendingOrderID });
+            } else {
+                // It is already a real Order, so just update it
+                await OrderModel.updateOne(
+                    { orderID: pendingOrderID },
+                    {
+                        paymentStatus: "paid",
+                        orderStage: "payment-completed",
+                        paymentID: paymentID,
+                    }
+                );
+            }
 
-            // 2. Update PaymentModel record to reference the actual orderID and mark paid
+            // 3. Update PaymentModel record to reference the actual orderID and mark paid
             await PaymentModel.updateOne(
                 { _id: payment._id },
                 {
@@ -200,8 +265,22 @@ router.post("/:paymentID/capture", async (req, res) => {
                 }
             );
 
-            // 3. Remove pending order after successful creation
-            await PendingOrderModel.deleteOne({ pendingOrderID });
+            // Record Completed state in Audit Ledger
+            const ledgerID = `LGR-${nanoid(10).toUpperCase()}`;
+            await PaymentLedgerModel.create({
+                ledgerID,
+                userID: pendingOrder.user.userID,
+                orderID: newOrderID,
+                paymentID: paymentID,
+                action: "COMPLETED",
+                amount: payment.amount,
+                currency: "USD",
+                metadata: {
+                    paypalOrderID: paymentID,
+                    paymentOption: "paypal",
+                    paymentMethod: "paypal",
+                },
+            });
 
             // 4. Send Confirmation Email
             const user = await UserModel.findOne({ userID: pendingOrder.user.userID });
@@ -227,6 +306,24 @@ router.post("/:paymentID/capture", async (req, res) => {
             </div>`,
                 });
             }
+        } else {
+            // Record Failed state in Audit Ledger
+            const ledgerID = `LGR-${nanoid(10).toUpperCase()}`;
+            await PaymentLedgerModel.create({
+                ledgerID,
+                userID: pendingOrder.user.userID,
+                orderID: pendingOrderID,
+                paymentID: paymentID,
+                action: "FAILED",
+                amount: payment.amount,
+                currency: "USD",
+                metadata: {
+                    paypalOrderID: paymentID,
+                    paypalResponseStatus: response.data.status,
+                    paymentOption: "paypal",
+                    paymentMethod: "paypal",
+                },
+            });
         }
 
         res.json({

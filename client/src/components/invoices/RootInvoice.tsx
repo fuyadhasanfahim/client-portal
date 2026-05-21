@@ -184,10 +184,6 @@ export default function RootInvoice() {
                                         order.orderStage === 'payment-completed'
                                 )
                                 .map((order: IOrder, index: number) => {
-                                    const item = statusData.find(
-                                        (item) => item.value === order.status
-                                    );
-
                                     return (
                                         <TableRow
                                             key={index}
@@ -244,18 +240,11 @@ export default function RootInvoice() {
                                                 />
                                             </TableCell>
                                             <TableCell className="text-center text-sm">
-                                                <span
-                                                    className={cn(
-                                                        'flex items-center capitalize justify-center gap-1',
-                                                        item && item.text
-                                                    )}
-                                                >
-                                                    <SelectOrderStatus
-                                                        order={order}
-                                                        role={role}
-                                                        orderID={order.orderID}
-                                                    />
-                                                </span>
+                                                <SelectOrderStatus
+                                                    order={order}
+                                                    role={role}
+                                                    orderID={order.orderID}
+                                                />
                                             </TableCell>
                                             <TableCell className="text-center">
                                                 <Link

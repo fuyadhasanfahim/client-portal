@@ -217,77 +217,75 @@ export default function OrderDetailsPaymentAndDetails({
 
             {role === 'user' && status === 'delivered' && (
                 <CardFooter className="border-t flex flex-col gap-3">
-                    {!isRevision && (
-                        <Dialog
-                            open={reviewDialogOpen}
-                            onOpenChange={setReviewDialogOpen}
-                        >
-                            <DialogTrigger asChild>
+                    <Dialog
+                        open={reviewDialogOpen}
+                        onOpenChange={setReviewDialogOpen}
+                    >
+                        <DialogTrigger asChild>
+                            <Button
+                                className="w-full bg-yellow-500 hover:bg-yellow-600 text-white"
+                                onClick={() => setReviewDialogOpen(true)}
+                            >
+                                <span className="flex items-center gap-2">
+                                    <Send className="h-4 w-4" />
+                                    Request Revision
+                                </span>
+                            </Button>
+                        </DialogTrigger>
+
+                        <DialogContent className="sm:max-w-[500px]">
+                            <DialogHeader>
+                                <DialogTitle>
+                                    Request a Revision
+                                </DialogTitle>
+                                <DialogDescription>
+                                    Tell us what needs to be changed.
+                                </DialogDescription>
+                            </DialogHeader>
+
+                            <div className="grid gap-2 py-2">
+                                <Label htmlFor="instruction">
+                                    Revision Instructions
+                                </Label>
+                                <Textarea
+                                    id="instruction"
+                                    placeholder="What needs to be changed?"
+                                    value={instruction}
+                                    onChange={(e) =>
+                                        setInstruction(e.target.value)
+                                    }
+                                    className="min-h-[140px]"
+                                />
+                            </div>
+
+                            <DialogFooter>
                                 <Button
-                                    className="w-full bg-yellow-500 hover:bg-yellow-600 text-white"
-                                    onClick={() => setReviewDialogOpen(true)}
+                                    className="bg-yellow-500 hover:bg-yellow-600"
+                                    disabled={
+                                        isReviewing || !instruction.trim()
+                                    }
+                                    onClick={handleReviewOrder}
                                 >
-                                    <span className="flex items-center gap-2">
+                                    {isReviewing ? (
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : (
                                         <Send className="h-4 w-4" />
-                                        Request Revision
+                                    )}
+                                    <span className="ml-2">
+                                        Submit Revision
                                     </span>
                                 </Button>
-                            </DialogTrigger>
-
-                            <DialogContent className="sm:max-w-[500px]">
-                                <DialogHeader>
-                                    <DialogTitle>
-                                        Request a Revision
-                                    </DialogTitle>
-                                    <DialogDescription>
-                                        Tell us what needs to be changed.
-                                    </DialogDescription>
-                                </DialogHeader>
-
-                                <div className="grid gap-2 py-2">
-                                    <Label htmlFor="instruction">
-                                        Revision Instructions
-                                    </Label>
-                                    <Textarea
-                                        id="instruction"
-                                        placeholder="What needs to be changed?"
-                                        value={instruction}
-                                        onChange={(e) =>
-                                            setInstruction(e.target.value)
-                                        }
-                                        className="min-h-[140px]"
-                                    />
-                                </div>
-
-                                <DialogFooter>
-                                    <Button
-                                        className="bg-yellow-500 hover:bg-yellow-600"
-                                        disabled={
-                                            isReviewing || !instruction.trim()
-                                        }
-                                        onClick={handleReviewOrder}
-                                    >
-                                        {isReviewing ? (
-                                            <Loader2 className="h-4 w-4 animate-spin" />
-                                        ) : (
-                                            <Send className="h-4 w-4" />
-                                        )}
-                                        <span className="ml-2">
-                                            Submit Revision
-                                        </span>
-                                    </Button>
-                                    <Button
-                                        variant="secondary"
-                                        onClick={() =>
-                                            setReviewDialogOpen(false)
-                                        }
-                                    >
-                                        Cancel
-                                    </Button>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
-                    )}
+                                <Button
+                                    variant="secondary"
+                                    onClick={() =>
+                                        setReviewDialogOpen(false)
+                                    }
+                                >
+                                    Cancel
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
 
                     <Dialog
                         open={completeDialogOpen}

@@ -7,6 +7,7 @@ import { PendingOrderModel } from "../models/pendingOrder.model.js";
 import envConfig from "../config/env.config.js";
 import Stripe from "stripe";
 import { sendEmail } from "../lib/nodemailer.js";
+import { PaymentLedgerModel } from "../models/paymentLedger.model.js";
 
 async function newOrderCheckoutInDB(
     id: string,
@@ -19,6 +20,9 @@ async function newOrderCheckoutInDB(
         let title = "";
         let userID = "";
         let currency = "usd";
+        let pricingType = "";
+        let price = 0;
+        let imagesCount = 0;
 
         if (type === "pending") {
             const pendingOrder = await PendingOrderModel.findOne({ pendingOrderID: id });
@@ -28,6 +32,9 @@ async function newOrderCheckoutInDB(
             total = pendingOrder.total || 0;
             title = pendingOrder.title || `Order ${id}`;
             userID = pendingOrder.user.userID;
+            pricingType = pendingOrder.pricingType || "";
+            price = pendingOrder.price || 0;
+            imagesCount = pendingOrder.imagesCount || 0;
         } else {
             const order = await OrderModel.findOne({ orderID: id });
             if (!order) {
@@ -36,6 +43,24 @@ async function newOrderCheckoutInDB(
             total = order.total || 0;
             title = order.title || `Order #${id}`;
             userID = order.user.userID;
+            pricingType = order.pricingType || "";
+            price = order.price || 0;
+            imagesCount = order.imagesCount || 0;
+        }
+
+        // --- MATH PRICE/COUNT GUARD CHECK ---
+        let calculatedTotal = 0;
+        if (pricingType === "per-image") {
+            calculatedTotal = price * imagesCount;
+        } else {
+            // flat-rate pricing
+            calculatedTotal = price;
+        }
+
+        if (Math.abs(calculatedTotal - total) > 0.01) {
+            throw new Error(
+                `Billing Guard Violation: Math mismatch. Expected total of ${calculatedTotal} (${pricingType} pricing with unit price ${price} and count ${imagesCount}) but database record shows ${total}.`
+            );
         }
 
         const user = await UserModel.findOne({ userID });
@@ -105,6 +130,25 @@ async function newOrderCheckoutInDB(
             );
         }
 
+        // Record Initialized state in Audit Ledger
+        const ledgerID = `LGR-${nanoid(10).toUpperCase()}`;
+        await PaymentLedgerModel.create({
+            ledgerID,
+            userID,
+            orderID: id,
+            paymentID: session.id,
+            action: "INITIALIZED",
+            amount: total,
+            currency: currency.toUpperCase(),
+            metadata: {
+                checkoutSessionID: session.id,
+                orderSessionId,
+                paymentOption,
+                paymentMethod,
+                type,
+            },
+        });
+
         return session.client_secret;
     } catch (error) {
         console.error("❌ Error in newOrderCheckoutInDB:", error);
@@ -129,6 +173,23 @@ async function paymentWebhookInDB(session: any) {
         }
 
         const { orderID, pendingOrderID, userID, paymentOption, paymentMethod, orderSessionId } = metadata;
+
+        // Record Webhook Received in Audit Ledger
+        const ledgerIDReceived = `LGR-${nanoid(10).toUpperCase()}`;
+        await PaymentLedgerModel.create({
+            ledgerID: ledgerIDReceived,
+            userID,
+            orderID: orderID || pendingOrderID,
+            paymentID: session.id,
+            action: "WEBHOOK_RECEIVED",
+            amount: (session.amount_total ?? 0) / 100,
+            currency: (session.currency ?? "usd").toUpperCase(),
+            metadata: {
+                paymentStatus: session.payment_status,
+                stripeSessionID: session.id,
+                orderSessionId,
+            },
+        });
 
         let finalOrderID = "";
 
@@ -213,6 +274,25 @@ async function paymentWebhookInDB(session: any) {
                 }
             );
         }
+
+        // Record Completed/Failed status in Audit Ledger
+        const finalAction = session.payment_status === "paid" || session.payment_status === "succeeded" ? "COMPLETED" : "FAILED";
+        const ledgerIDFinal = `LGR-${nanoid(10).toUpperCase()}`;
+        await PaymentLedgerModel.create({
+            ledgerID: ledgerIDFinal,
+            userID,
+            orderID: finalOrderID,
+            paymentID: session.id,
+            action: finalAction,
+            amount: (session.amount_total ?? 0) / 100,
+            currency: (session.currency ?? "usd").toUpperCase(),
+            metadata: {
+                paymentStatus: session.payment_status,
+                stripeSessionID: session.id,
+                orderSessionId,
+                paymentIntentID: session.payment_intent?.toString(),
+            },
+        });
 
         const user = await UserModel.findOne({ userID });
 

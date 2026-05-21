@@ -30,8 +30,10 @@ import { useSendRevisionMessageMutation } from '@/redux/features/orders/ordersAp
 import useLoggedInUser from '@/utils/getLoggedInUser';
 import ApiError from '@/components/shared/ApiError';
 import toast from 'react-hot-toast';
+import { socket } from '@/lib/socket';
 
 type Props = {
+    orderID: string;
     revision: IRevision | null | undefined;
     className?: string;
 };
@@ -121,7 +123,7 @@ const RevisionMessageItem = ({
     );
 };
 
-export default function OrderDetailsRevisions({ revision, className }: Props) {
+export default function OrderDetailsRevisions({ orderID, revision, className }: Props) {
     const { user } = useLoggedInUser();
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
@@ -130,9 +132,39 @@ export default function OrderDetailsRevisions({ revision, className }: Props) {
 
     const scrollRef = useRef<HTMLDivElement | null>(null);
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-    const orderID = revision?.orderID;
+    const [localMessages, setLocalMessages] = useState<IRevisionMessage[]>([]);
 
-    const messages = revision?.messages ?? [];
+    useEffect(() => {
+        if (revision?.messages) {
+            setLocalMessages(revision.messages);
+        }
+    }, [revision?.messages]);
+
+    useEffect(() => {
+        if (!orderID) return;
+
+        const handleNewMessage = (msg: IRevisionMessage) => {
+            setLocalMessages((prev) => {
+                const exists = prev.some(
+                    (m) => {
+                        const mTime = m.createdAt ? new Date(m.createdAt).getTime() : 0;
+                        const msgTime = msg.createdAt ? new Date(msg.createdAt).getTime() : 0;
+                        return m.message === msg.message &&
+                            m.senderID === msg.senderID &&
+                            (mTime && msgTime ? Math.abs(mTime - msgTime) < 10000 : false);
+                    }
+                );
+                if (exists) return prev;
+                return [...prev, msg];
+            });
+        };
+
+        socket.on('new-revision-message', handleNewMessage);
+
+        return () => {
+            socket.off('new-revision-message', handleNewMessage);
+        };
+    }, [orderID]);
 
     const sender = useMemo(
         () => ({
@@ -155,7 +187,7 @@ export default function OrderDetailsRevisions({ revision, className }: Props) {
         };
         const timeoutId = setTimeout(scrollToBottom, 150);
         return () => clearTimeout(timeoutId);
-    }, [messages.length]);
+    }, [localMessages.length]);
 
     useEffect(() => {
         const timeoutId = setTimeout(() => setIsTyping(false), 1000);
@@ -203,7 +235,7 @@ export default function OrderDetailsRevisions({ revision, className }: Props) {
     };
 
     // If revision doesn't exist or no messages are present
-    if (!revision || messages.length === 0) {
+    if (!revision || localMessages.length === 0) {
         return (
             <Card className={cn('border border-border shadow-sm bg-card', className)}>
                 <CardHeader>
@@ -281,7 +313,7 @@ export default function OrderDetailsRevisions({ revision, className }: Props) {
                     <div>
                         <CardTitle className="text-xl font-semibold">Revisions</CardTitle>
                         <CardDescription className="text-xs">
-                            {messages.length} messages in this thread
+                            {localMessages.length} messages in this thread
                         </CardDescription>
                     </div>
                 </div>
@@ -300,7 +332,7 @@ export default function OrderDetailsRevisions({ revision, className }: Props) {
                 className="max-h-[400px] overflow-y-auto p-6 bg-muted/5 divide-y-0"
             >
                 <div className="flex flex-col gap-6 w-full">
-                    {messages.map((m, i) => (
+                    {localMessages.map((m, i) => (
                         <RevisionMessageItem
                             key={`${revision.orderID}-${i}-${m.createdAt}`}
                             message={m}

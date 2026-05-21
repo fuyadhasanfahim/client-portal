@@ -16,7 +16,7 @@ async function newOrderCheckout(req: Request, res: Response) {
         }
 
         const id = orderID || pendingOrderID;
-        const type = pendingOrderID ? "pending" : "order";
+        const type = id.startsWith("PO") ? "pending" : "order";
 
         const client_secret = await StripeServices.newOrderCheckoutInDB(
             id,

@@ -14,8 +14,20 @@ const RevisionMessageSchema = new Schema<IRevisionMessage>(
 
 const RevisionSchema = new Schema(
     {
-        orderID: { type: String, unique: true },
-        quoteID: { type: String, unique: true },
+        orderID: {
+            type: String,
+            index: {
+                unique: true,
+                partialFilterExpression: { orderID: { $type: "string" } },
+            },
+        },
+        quoteID: {
+            type: String,
+            index: {
+                unique: true,
+                partialFilterExpression: { quoteID: { $type: "string" } },
+            },
+        },
         messages: { type: [RevisionMessageSchema], default: [] },
         status: {
             type: String,

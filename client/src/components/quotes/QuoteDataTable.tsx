@@ -271,10 +271,6 @@ export default function QuoteDataTable({
                             </TableRow>
                         ) : (
                             quotes.map((quote: IQuote, index: number) => {
-                                const item = statusData.find(
-                                    (item) => item.value === quote.status
-                                );
-
                                 return (
                                     <TableRow
                                         key={index}
@@ -312,19 +308,12 @@ export default function QuoteDataTable({
                                             {quote.title}
                                         </TableCell>
                                         <TableCell className="text-center text-sm bquote-r">
-                                            <span
-                                                className={cn(
-                                                    'flex items-center capitalize justify-center gap-1',
-                                                    item && item.text
-                                                )}
-                                            >
-                                                <SelectQuoteStatus
-                                                    quote={quote}
-                                                    role={role}
-                                                    quoteID={quote.quoteID}
-                                                    refetch={refetch}
-                                                />
-                                            </span>
+                                            <SelectQuoteStatus
+                                                quote={quote}
+                                                role={role}
+                                                quoteID={quote.quoteID}
+                                                refetch={refetch}
+                                            />
                                         </TableCell>
                                         <TableCell className="text-center">
                                             <Link

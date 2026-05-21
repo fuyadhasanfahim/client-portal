@@ -71,7 +71,7 @@ export default function OrderDetailsCard({
                     <OrderDetailsStatus status={order.status} role={user.role} />
                     <OrderDetailsSummary order={order} />
                     <OrderDetailsServiceList order={order} />
-                    <OrderDetailsRevisions revision={revision} />
+                    <OrderDetailsRevisions orderID={order.orderID} revision={revision} />
                 </div>
 
                 {/* Right Sidebar */}

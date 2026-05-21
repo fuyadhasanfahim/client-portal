@@ -105,12 +105,12 @@ export default function SelectQuoteStatus({
                     {quote.status.replace(/_/g, ' ')}
                 </span>
             ) : quote.status === 'pending' ? (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center gap-2.5">
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button
-                                variant={'ghost'}
-                                size={'icon'}
+                                variant="ghost"
+                                size="icon"
                                 disabled={isLoading}
                                 onClick={() =>
                                     handleQuoteStatusChange({
@@ -118,18 +118,21 @@ export default function SelectQuoteStatus({
                                         status: 'cancelled',
                                     })
                                 }
+                                className="h-8 w-8 rounded-full border border-rose-200/60 bg-rose-50/60 text-rose-600 hover:bg-rose-100 hover:text-rose-700 hover:border-rose-300 active:scale-95 transition-all shadow-sm duration-200"
                             >
-                                <X className="text-destructive" />
+                                <X className="h-4 w-4 stroke-[2.5]" />
                             </Button>
                         </TooltipTrigger>
-                        <TooltipContent>Cancel the quote</TooltipContent>
+                        <TooltipContent>
+                            Cancel the quote
+                        </TooltipContent>
                     </Tooltip>
 
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button
-                                variant={'ghost'}
-                                size={'icon'}
+                                variant="ghost"
+                                size="icon"
                                 disabled={isLoading}
                                 onClick={() =>
                                     handleQuoteStatusChange({
@@ -137,11 +140,14 @@ export default function SelectQuoteStatus({
                                         status: 'in_progress',
                                     })
                                 }
+                                className="h-8 w-8 rounded-full border border-primary/30 bg-primary/5 text-primary hover:bg-primary hover:text-primary-foreground hover:border-primary active:scale-95 transition-all shadow-sm duration-200"
                             >
-                                <Check className="text-primary" />
+                                <Check className="h-4 w-4 stroke-[2.5]" />
                             </Button>
                         </TooltipTrigger>
-                        <TooltipContent>Accept the quote</TooltipContent>
+                        <TooltipContent>
+                            Accept the quote
+                        </TooltipContent>
                     </Tooltip>
                 </div>
             ) : (

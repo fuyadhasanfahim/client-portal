@@ -763,6 +763,7 @@ async function sendRevisionMessage(req: Request, res: Response) {
         }
 
         io.to(orderID).emit("revision-updated");
+        io.to(orderID).emit("new-revision-message", msg);
 
         res.status(200).json({ success: true, revision });
     } catch (error) {

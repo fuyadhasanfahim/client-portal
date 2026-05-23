@@ -19,7 +19,7 @@ export default function InvoiceTemplate({ quote }: { quote: IQuote }) {
             <div className="flex flex-col md:flex-row justify-between items-start mb-8">
                 <div className="mb-6 md:mb-0">
                     <Image
-                        src="https://res.cloudinary.com/dny7zfbg9/image/upload/v1755925557/uigjdstdcvlsngrtxbrl.png"
+                        src="https://res.cloudinary.com/dny7zfbg9/image/upload/v1777996436/q83auvamwih8u8ftw5zu.png"
                         alt="Company Logo"
                         width={200}
                         height={50}
@@ -28,7 +28,7 @@ export default function InvoiceTemplate({ quote }: { quote: IQuote }) {
                 </div>
 
                 <div className="text-right">
-                    <h1 className="text-3xl font-bold text-amber-500 mb-1">
+                    <h1 className="text-3xl font-bold text-primary mb-1">
                         INVOICE
                     </h1>
                     <div className="space-y-1">

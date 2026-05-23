@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Loader2, Printer } from 'lucide-react';
+import { Loader2, Download } from 'lucide-react';
 import html2canvas from 'html2canvas-pro';
 import jsPDF from 'jspdf';
 import toast from 'react-hot-toast';
@@ -18,7 +18,7 @@ export default function InvoiceCard({ quoteID }: { quoteID: string }) {
 
     const quote = !isLoading ? data?.data : {};
 
-    const generatePDF = async (): Promise<Blob> => {
+    const generatePDF = async (): Promise<void> => {
         if (typeof window === 'undefined') {
             throw new Error('Cannot generate PDF on server side');
         }
@@ -52,8 +52,7 @@ export default function InvoiceCard({ quoteID }: { quoteID: string }) {
                 heightLeft -= pageHeight;
             }
 
-            const pdfBlob = pdf.output('blob');
-            return pdfBlob;
+            pdf.save(`Invoice-${quoteID}.pdf`);
         } finally {
             setIsGeneratingPDF(false);
         }
@@ -64,9 +63,8 @@ export default function InvoiceCard({ quoteID }: { quoteID: string }) {
 
         setIsGeneratingPDF(true);
         try {
-            const pdfBlob = await generatePDF();
-            const pdfUrl = URL.createObjectURL(pdfBlob);
-            window.open(pdfUrl, '_blank');
+            await generatePDF();
+            toast.success('Invoice downloaded successfully!');
         } catch (error) {
             console.log(error);
             toast.error('Failed to generate PDF');
@@ -103,9 +101,9 @@ export default function InvoiceCard({ quoteID }: { quoteID: string }) {
                     {isGeneratingPDF ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                        <Printer className="h-4 w-4" />
+                        <Download className="h-4 w-4" />
                     )}
-                    {isGeneratingPDF ? 'Preparing...' : 'Print/Save PDF'}
+                    {isGeneratingPDF ? 'Preparing...' : 'Download Invoice'}
                 </Button>
             </div>
 

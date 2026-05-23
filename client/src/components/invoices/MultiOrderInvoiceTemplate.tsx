@@ -97,13 +97,13 @@ export default function MultiOrderInvoiceTemplate({
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-8">
                 <img
-                    src="https://res.cloudinary.com/dny7zfbg9/image/upload/v1755925557/uigjdstdcvlsngrtxbrl.png"
+                    src="https://res.cloudinary.com/dny7zfbg9/image/upload/v1777996436/q83auvamwih8u8ftw5zu.png"
                     alt="Company Logo"
-                    className="w-auto h-24"
+                    className="w-auto h-12"
                 />
                 <div className="text-left md:text-right">
                     <div className="space-y-1">
-                        <h1 className="text-3xl font-bold text-amber-600 leading-tight">
+                        <h1 className="text-3xl font-bold text-primary leading-tight">
                             INVOICE
                         </h1>
                         <p className="text-sm text-gray-500">#{invoiceNo}</p>
@@ -276,7 +276,7 @@ export default function MultiOrderInvoiceTemplate({
                             >
                                 Grand Total
                             </TableCell>
-                            <TableCell className="text-right font-bold text-amber-600">
+                            <TableCell className="text-right font-bold text-primary">
                                 {currency(grandTotal)}
                             </TableCell>
                         </TableRow>

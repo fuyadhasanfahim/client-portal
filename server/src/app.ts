@@ -17,8 +17,9 @@ app.post(
     StripeControllers.paymentWebhook
 );
 
+// Allow configured frontend URL, fall back to localhost:3000 in development
 const corsOptions = {
-    origin: frontend_url!,
+    origin: frontend_url || "http://localhost:3000",
     credentials: true,
     optionsSuccessStatus: 200,
 };

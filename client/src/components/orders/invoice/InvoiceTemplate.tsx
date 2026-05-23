@@ -28,7 +28,7 @@ export default function InvoiceTemplate({
             <div className="flex flex-col md:flex-row justify-between items-start mb-12">
                 <div className="mb-8 md:mb-0">
                     <Image
-                        src="https://res.cloudinary.com/dny7zfbg9/image/upload/v1755925557/uigjdstdcvlsngrtxbrl.png"
+                        src="https://res.cloudinary.com/dny7zfbg9/image/upload/v1777996436/q83auvamwih8u8ftw5zu.png"
                         alt="Web Briks Logo"
                         width={200}
                         height={60}
